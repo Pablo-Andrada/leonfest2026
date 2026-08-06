@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>¡Feliz Cumple León! · 10 años</title>
+
+<!--
+  ============================================================
+  LEON FEST 2026 · mini-pagina  (v4)
+  ============================================================
+  SOLAPAS:  Inicio · Juegos · Premios · Fotos
+
+  QUE EDITAR (todo marcado abajo en el <script>):
+   1) FOTO portada: imagen  foto.jpg  al lado de este archivo.
+   2) FRASE: busca  FRASE_PORTADA  y edita el texto.
+   3) FOTOS: carpeta  fotos/  (1.jpg 2.jpg ...) + arreglo  FOTOS.
+   4) TRIVIA: edita  const PREGUNTAS  ("ok" = indice correcto).
+   5) PREMIOS: edita  const PREMIOS  (que gana en cada escalon).
+      El ultimo es la BICI.
+   6) TITULOS: const TITULOS  son rangos abiertos por estrellas;
+      podes colgarles premios nuevos mas adelante.
+
+  DEPLOY: repo -> subi index.html (+ foto.jpg + carpeta fotos/)
+  -> Settings -> Pages -> Deploy from branch (main / root).
+  ============================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#140a26; --bg2:#1d0d38; --panel:#241043; --panel2:#2e155a;
+  --magenta:#ff2e9a; --cyan:#26e8ff; --violet:#b14bff; --yellow:#ffe14d; --lime:#8cff5a;
+  --ink:#0a0416; --text:#fbeaff; --muted:#c9a9e8; --nav-h:66px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(177,75,255,.35), transparent 60%),
+    radial-gradient(1000px 500px at 110% 8%, rgba(255,46,154,.28), transparent 55%),
+    radial-gradient(900px 700px at 50% 120%, rgba(38,232,255,.20), transparent 55%),
+    var(--bg);
+  color:var(--text); font-family:"Baloo 2",system-ui,sans-serif; min-height:100vh;
+  overflow-x:hidden; -webkit-tap-highlight-color:transparent;
+}
+body::before{ content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.06) 1.4px, transparent 1.6px); background-size:16px 16px; mix-blend-mode:screen; }
+
+.app{ position:relative; z-index:1; max-width:640px; margin:0 auto; padding:20px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 24px); }
+.tab{ display:none; animation:fade .25s ease } .tab.active{ display:block }
+@keyframes fade{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+.tabbar{ position:fixed; left:0; right:0; bottom:0; z-index:30; display:flex; justify-content:center; gap:4px;
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom)); background:linear-gradient(0deg, rgba(10,4,22,.98), rgba(20,10,40,.9));
+  border-top:2px solid rgba(177,75,255,.45); backdrop-filter:blur(8px); }
+.tabbar button{ flex:1; max-width:130px; background:none; border:none; cursor:pointer; color:var(--muted); font-family:"Baloo 2"; font-weight:800; font-size:11px;
+  display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 4px; border-radius:14px; transition:color .15s, background .15s; }
+.tabbar button .ti{ font-size:22px; line-height:1; filter:grayscale(.4) brightness(.8); transition:filter .15s, transform .15s }
+.tabbar button.active{ color:#fff; background:rgba(177,75,255,.18) } .tabbar button.active .ti{ filter:none; transform:translateY(-2px) }
+
+.hero{ text-align:center; padding:10px 6px 8px }
+.kicker{ font-family:"Bangers",cursive; letter-spacing:2px; color:var(--cyan); font-size:clamp(15px,4.5vw,20px); text-shadow:0 0 10px rgba(38,232,255,.6); transform:rotate(-2deg); margin-bottom:4px; }
+.title{ font-family:"Bangers",cursive; font-size:clamp(42px,13vw,84px); line-height:.92; margin:2px 0 6px; color:#fff;
+  text-shadow:2px 2px 0 var(--ink),-2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px -2px 0 var(--ink), 0 0 18px rgba(255,46,154,.85), 0 0 34px rgba(177,75,255,.6); transform:rotate(-1.5deg); }
+.badge{ display:inline-block; margin:6px 0 2px; font-family:"Bangers",cursive; font-size:clamp(20px,6vw,30px); color:var(--ink); background:var(--yellow);
+  padding:6px 18px; border:3px solid var(--ink); border-radius:999px; transform:rotate(3deg); box-shadow:4px 4px 0 var(--magenta), 0 0 26px rgba(255,225,77,.5); }
+.photo{ position:relative; width:min(280px,72vw); aspect-ratio:1/1; margin:20px auto 8px; border-radius:22px; overflow:hidden; border:4px solid var(--ink);
+  box-shadow:8px 8px 0 var(--violet), 0 0 30px rgba(177,75,255,.5); background:repeating-linear-gradient(45deg,#2a1250 0 14px,#37196b 14px 28px); transform:rotate(-2deg); }
+.photo img{ width:100%; height:100%; object-fit:cover; display:block }
+.photo .fallback{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-align:center; }
+.photo .fallback .emoji{ font-size:74px; filter:drop-shadow(0 0 14px rgba(255,225,77,.7)) } .photo .fallback small{ color:var(--muted); font-size:12px; padding:0 16px }
+.photo .tape{ position:absolute; top:-12px; left:50%; transform:translateX(-50%) rotate(-3deg); width:120px; height:26px; background:rgba(38,232,255,.35); border:1px dashed rgba(255,255,255,.4); }
+.phrase{ font-weight:700; font-size:clamp(16px,4.6vw,20px); color:var(--text); max-width:440px; margin:14px auto 6px; line-height:1.35; } .phrase .heart{ color:var(--magenta) }
+.sign{ color:var(--cyan); font-family:"Bangers",cursive; letter-spacing:1px; font-size:18px; margin-top:2px }
+
+.sec-title{ text-align:center; font-family:"Bangers",cursive; letter-spacing:1.5px; font-size:clamp(28px,8vw,42px); margin:12px 0 2px; color:var(--lime); text-shadow:2px 2px 0 var(--ink), 0 0 18px rgba(140,255,90,.55); transform:rotate(-1deg); }
+.sec-sub{ text-align:center; color:var(--muted); font-weight:500; margin:0 0 16px }
+
+.games{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
+.gcard{ cursor:pointer; border:3px solid var(--ink); border-radius:18px; padding:16px 12px; text-align:center; color:var(--text);
+  background:linear-gradient(160deg,var(--panel),var(--panel2)); box-shadow:5px 5px 0 rgba(10,4,22,.6); transition:transform .12s ease, box-shadow .12s ease; font-weight:800; }
+.gcard:hover,.gcard:focus-visible{ transform:translate(-2px,-2px); box-shadow:8px 8px 0 var(--magenta); outline:none }
+.gcard.g2:hover{ box-shadow:8px 8px 0 var(--cyan) } .gcard.g3:hover{ box-shadow:8px 8px 0 var(--violet) } .gcard.g4:hover{ box-shadow:8px 8px 0 var(--yellow) } .gcard.g5:hover{ box-shadow:8px 8px 0 var(--lime) }
+.gcard .ic{ font-size:36px; display:block; margin-bottom:5px } .gcard .nm{ font-size:16px }
+
+.star-head{ text-align:center; margin-bottom:6px }
+.rango{ font-family:"Bangers",cursive; font-size:26px; color:var(--cyan); text-shadow:0 0 14px rgba(38,232,255,.5); letter-spacing:1px }
+.star-count{ font-family:"Bangers",cursive; font-size:34px; color:var(--yellow); text-shadow:0 0 16px rgba(255,225,77,.6); margin-top:2px }
+.progress{ height:16px; border:3px solid var(--ink); border-radius:999px; background:var(--panel2); overflow:hidden; margin:10px 0 4px }
+.progress .fill{ height:100%; background:linear-gradient(90deg,var(--magenta),var(--yellow),var(--lime)); transition:width .5s }
+.next-lbl{ color:var(--muted); font-weight:600; font-size:13px }
+
+.roadmap{ display:grid; gap:10px; margin-top:16px }
+.premio-row{ display:flex; align-items:center; gap:14px; border:3px solid var(--ink); border-radius:16px; padding:12px 14px; background:linear-gradient(150deg,var(--panel),var(--panel2)); box-shadow:4px 4px 0 rgba(10,4,22,.5) }
+.premio-row.bici{ border-color:var(--yellow); box-shadow:4px 4px 0 var(--magenta), 0 0 22px rgba(255,225,77,.35) }
+.premio-row .pem{ font-size:34px; flex:0 0 auto; filter:grayscale(1) opacity(.55) } .premio-row.open .pem{ filter:none }
+.premio-row .pbody{ flex:1 } .premio-row .pname{ font-weight:800; font-size:16px } .premio-row .pdesc{ color:var(--muted); font-size:13px; margin-top:1px }
+.premio-row .ptag{ font-weight:800; font-size:12px; padding:4px 10px; border-radius:999px; border:2px solid var(--ink) }
+.ptag.win{ background:var(--lime); color:var(--ink) } .ptag.lock{ background:var(--panel2); color:var(--muted) }
+
+.score-list{ display:grid; gap:10px; margin-top:22px }
+.score-card{ border:3px solid var(--ink); border-radius:16px; padding:12px 14px; background:linear-gradient(150deg,var(--panel),var(--panel2)); box-shadow:4px 4px 0 rgba(10,4,22,.55); display:flex; align-items:center; gap:12px }
+.score-card .sic{ font-size:30px } .score-card .game{ font-weight:800; font-size:15px } .score-card .rec{ color:var(--muted); font-size:13px; margin-top:1px } .score-card .rec b{ color:var(--yellow) }
+.score-reset{ text-align:center; margin-top:16px }
+
+.gallery{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+.gtile{ position:relative; aspect-ratio:1/1; border-radius:16px; overflow:hidden; border:3px solid var(--ink); cursor:pointer; background:repeating-linear-gradient(45deg,#241043 0 12px,#2e155a 12px 24px); box-shadow:4px 4px 0 rgba(10,4,22,.5); }
+.gtile img{ width:100%; height:100%; object-fit:cover; display:block }
+.gtile .ph{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--muted); text-align:center; padding:6px }
+.gtile .ph .e{ font-size:34px; opacity:.85 } .gtile .ph small{ font-size:11px; line-height:1.2 }
+.gtile .cap{ position:absolute; left:0; right:0; bottom:0; padding:14px 8px 6px; font-size:12px; font-weight:700; color:#fff; text-align:center; background:linear-gradient(0deg, rgba(10,4,22,.9), transparent); }
+
+.modal{ position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(8,3,20,.85); backdrop-filter:blur(4px); } .modal.open{ display:flex }
+.sheet{ width:min(460px,100%); max-height:92vh; overflow:auto; background:linear-gradient(180deg,var(--bg2),var(--panel)); border:3px solid var(--ink); border-radius:22px; padding:18px 16px 20px; box-shadow:0 0 40px rgba(177,75,255,.5); }
+.sheet h2{ font-family:"Bangers",cursive; letter-spacing:1px; font-size:30px; margin:2px 0 2px; color:var(--cyan); text-shadow:0 0 14px rgba(38,232,255,.5); }
+.sheet .lead{ color:var(--muted); font-weight:500; margin:0 0 12px; font-size:14px }
+.close{ float:right; font-family:"Baloo 2"; font-weight:800; cursor:pointer; background:var(--magenta); color:#fff; border:3px solid var(--ink); width:40px; height:40px; border-radius:12px; font-size:20px; line-height:1; } .close:active{ transform:translateY(1px) }
+.lightbox img{ width:100%; border-radius:14px; border:3px solid var(--ink); display:block } .lightbox p{ text-align:center; font-weight:700; margin:12px 0 2px }
+
+.hud{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin:2px 0 8px; font-weight:800; font-size:14px }
+.hud .lv{ background:var(--violet); color:#fff; border:2px solid var(--ink); border-radius:999px; padding:3px 12px; font-size:13px }
+.banner{ text-align:center; font-family:"Bangers",cursive; font-size:26px; color:var(--lime); min-height:30px; margin:8px 0; text-shadow:0 0 12px rgba(140,255,90,.5) }
+
+.btn{ font-family:"Baloo 2"; font-weight:800; cursor:pointer; background:var(--violet); color:#fff; border:3px solid var(--ink); padding:10px 18px; border-radius:14px; font-size:16px; box-shadow:3px 3px 0 var(--ink); }
+.btn:active{ transform:translate(1px,1px); box-shadow:2px 2px 0 var(--ink) } .btn.alt{ background:var(--cyan); color:var(--ink) } .btn.danger{ background:var(--magenta); color:#fff }
+.stat{ font-weight:800; color:var(--yellow) }
+
+.mem-grid{ display:grid; gap:8px; margin-top:6px }
+.mem-card{ aspect-ratio:1/1; border-radius:12px; border:3px solid var(--ink); display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer; background:linear-gradient(145deg,var(--panel2),var(--violet)); color:transparent; user-select:none; transition:transform .15s }
+.mem-card.show{ background:var(--bg); color:#fff } .mem-card.done{ background:linear-gradient(145deg,#1c7a3a,var(--lime)); color:#fff; cursor:default }
+
+#snakeCanvas,#autoCanvas,#basketCanvas,#naveCanvas{ display:block; margin:0 auto; background:var(--ink); border:3px solid var(--violet); border-radius:14px; touch-action:none }
+#snakeCanvas{ width:min(300px,86vw); height:min(300px,86vw) }
+#autoCanvas,#basketCanvas,#naveCanvas{ width:min(300px,84vw); height:min(380px,106vw) }
+.dpad{ display:grid; grid-template-columns:repeat(3,56px); grid-template-rows:repeat(3,56px); gap:6px; justify-content:center; margin:14px auto 0 } .dpad .btn{ padding:0; font-size:22px; border-radius:12px; display:flex; align-items:center; justify-content:center } .dpad .sp{ visibility:hidden }
+.lr{ display:flex; gap:12px; justify-content:center; margin-top:12px } .lr .btn{ font-size:24px; min-width:74px }
+
+.ttt-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; max-width:260px; margin:8px auto }
+.ttt-cell{ aspect-ratio:1/1; border:3px solid var(--ink); border-radius:14px; cursor:pointer; background:var(--panel2); display:flex; align-items:center; justify-content:center; font-size:44px } .ttt-cell:hover{ background:var(--panel) }
+
+.tri-q{ font-weight:800; font-size:18px; margin:6px 0 12px; min-height:48px } .tri-opts{ display:grid; gap:10px }
+.tri-opt{ text-align:left; font-family:"Baloo 2"; font-weight:700; font-size:15px; padding:12px 14px; border-radius:14px; border:3px solid var(--ink); cursor:pointer; background:var(--panel2); color:var(--text) }
+.tri-opt:hover{ background:var(--panel) } .tri-opt.ok{ background:linear-gradient(145deg,#1c7a3a,var(--lime)); color:#fff } .tri-opt.no{ background:linear-gradient(145deg,#7a1c2e,var(--magenta)); color:#fff }
+
+.center{ text-align:center } .mt{ margin-top:14px }
+
+#celebra{ position:fixed; inset:0; z-index:70; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(8,3,20,.9); backdrop-filter:blur(5px); text-align:center; } #celebra.open{ display:flex }
+#celebra .box{ background:linear-gradient(180deg,var(--bg2),var(--panel)); border:4px solid var(--yellow); border-radius:24px; padding:26px 22px; box-shadow:0 0 50px rgba(255,225,77,.5); max-width:360px }
+#celebra .big{ font-size:80px; margin:4px 0; filter:drop-shadow(0 0 18px rgba(255,225,77,.7)) } #celebra h3{ font-family:"Bangers",cursive; font-size:30px; color:var(--yellow); margin:6px 0 2px; letter-spacing:1px } #celebra p{ color:var(--text); font-weight:700; margin:2px 0 16px }
+
+.box-pick{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:8px }
+.box-card{ cursor:pointer; border:3px solid var(--ink); border-radius:16px; padding:8px 6px; text-align:center; background:linear-gradient(150deg,var(--panel),var(--panel2)); box-shadow:4px 4px 0 rgba(10,4,22,.5); transition:transform .12s, box-shadow .12s }
+.box-card:hover{ transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--magenta) }
+.box-face{ width:100%; aspect-ratio:1/1; border-radius:12px; overflow:hidden; background:var(--bg); display:flex; align-items:center; justify-content:center; border:2px solid var(--ink) }
+.box-face img{ width:100%; height:100%; object-fit:cover; display:block }
+.box-face .box-ph{ font-size:38px; display:flex; align-items:center; justify-content:center; width:100%; height:100% }
+.box-nm{ font-weight:800; font-size:12px; margin-top:5px }
+#boxCanvas{ display:block; margin:0 auto; background:var(--ink); border:3px solid var(--violet); border-radius:14px; touch-action:none; width:min(300px,84vw); height:auto }
+
+#confetti{ position:fixed; inset:0; pointer-events:none; z-index:90 }
+@media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important } }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+
+<div class="app">
+
+  <section class="tab active" id="tab-inicio">
+    <header class="hero">
+      <div class="kicker">★ LEON FEST 2026 ★</div>
+      <h1 class="title">¡FELIZ CUMPLE<br>LEÓN!</h1>
+      <div class="badge">🎉 10 AÑOS 🎉</div>
+      <div class="photo"><div class="tape"></div>
+        <img src="foto.jpg" alt="León" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="fallback" style="display:none"><div class="emoji">🦁</div><small>Poné una foto llamada <b>foto.jpg</b> al lado de este archivo</small></div>
+      </div>
+      <!-- FRASE_PORTADA -->
+      <p class="phrase">Diez años de aventuras, risas y partidas juntos. <span class="heart">♥</span><br>Sos lo mejor que nos pasó, campeón. ¡Jugá, sumá estrellas y desbloqueá tus premios!</p>
+      <div class="sign">— con todo el amor, la familia 🦁</div>
+    </header>
+  </section>
+
+  <section class="tab" id="tab-juegos">
+    <h2 class="sec-title">🕹️ JUEGOS</h2>
+    <p class="sec-sub">Cada nivel que ganás suma una ⭐</p>
+    <div class="games">
+      <div class="gcard g1" tabindex="0" role="button" onclick="openGame('memoria')" onkeydown="if(event.key==='Enter')openGame('memoria')"><span class="ic">🃏</span><span class="nm">Memoria</span></div>
+      <div class="gcard g2" tabindex="0" role="button" onclick="openGame('snake')" onkeydown="if(event.key==='Enter')openGame('snake')"><span class="ic">🐍</span><span class="nm">Viborita</span></div>
+      <div class="gcard g3" tabindex="0" role="button" onclick="openGame('autos')" onkeydown="if(event.key==='Enter')openGame('autos')"><span class="ic">🏎️</span><span class="nm">Autitos</span></div>
+      <div class="gcard g4" tabindex="0" role="button" onclick="openGame('basquet')" onkeydown="if(event.key==='Enter')openGame('basquet')"><span class="ic">🏀</span><span class="nm">Básquet</span></div>
+      <div class="gcard g5" tabindex="0" role="button" onclick="openGame('nave')" onkeydown="if(event.key==='Enter')openGame('nave')"><span class="ic">🚀</span><span class="nm">Nave</span></div>
+      <div class="gcard g3" tabindex="0" role="button" onclick="openGame('boxeo')" onkeydown="if(event.key==='Enter')openGame('boxeo')"><span class="ic">🥊</span><span class="nm">Boxeo</span></div>
+      <div class="gcard g2" tabindex="0" role="button" onclick="openGame('ttt')" onkeydown="if(event.key==='Enter')openGame('ttt')"><span class="ic">⭕</span><span class="nm">Ta-Te-Ti</span></div>
+      <div class="gcard g1" tabindex="0" role="button" onclick="openGame('trivia')" onkeydown="if(event.key==='Enter')openGame('trivia')"><span class="ic">❓</span><span class="nm">Trivia</span></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-premios">
+    <h2 class="sec-title" style="color:var(--yellow);text-shadow:2px 2px 0 var(--ink),0 0 18px rgba(255,225,77,.55)">🏆 PREMIOS</h2>
+    <p class="sec-sub">Sumá estrellas jugando y llegá a la bici 🚲</p>
+    <div id="premiosHost"></div>
+    <div class="score-list" id="scoreList"></div>
+    <div class="score-reset"><button class="btn danger" id="scoreReset">Empezar de cero</button></div>
+  </section>
+
+  <section class="tab" id="tab-fotos">
+    <h2 class="sec-title" style="color:var(--cyan);text-shadow:2px 2px 0 var(--ink),0 0 18px rgba(38,232,255,.55)">📸 FOTOS</h2>
+    <p class="sec-sub">Momentos en familia · tocá para agrandar</p>
+    <div class="gallery" id="gallery"></div>
+  </section>
+
+</div>
+
+<nav class="tabbar" id="tabbar">
+  <button class="active" data-tab="inicio"><span class="ti">🏠</span>Inicio</button>
+  <button data-tab="juegos"><span class="ti">🕹️</span>Juegos</button>
+  <button data-tab="premios"><span class="ti">🏆</span>Premios</button>
+  <button data-tab="fotos"><span class="ti">📸</span>Fotos</button>
+</nav>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="sheet"><button class="close" onclick="closeModal()" aria-label="Cerrar">✕</button><div id="modalHost"></div></div>
+</div>
+
+<div id="celebra" onclick="this.classList.remove('open')">
+  <div class="box"><div class="big" id="celEmoji">🎁</div><h3 id="celTitle">¡PREMIO!</h3><p id="celDesc"></p>
+    <button class="btn alt" onclick="document.getElementById('celebra').classList.remove('open')">¡Genial!</button></div>
+</div>
+
+<script>
+/* ===== FOTOS (editá) ===== */
+const FOTOS=[
+  { src:'fotos/1.jpg', cap:'Primer cumple' }, { src:'fotos/2.jpg', cap:'De vacaciones' },
+  { src:'fotos/3.jpg', cap:'Jugando en familia' }, { src:'fotos/4.jpg', cap:'Sonrisa de campeón' },
+  { src:'fotos/5.jpg', cap:'Con la abu' }, { src:'fotos/6.jpg', cap:'¡A los 10!' },
+];
+
+/* ===== TRIVIA (editá · "ok" = índice correcto) ===== */
+const PREGUNTAS=[
+  { q:'¿Cuántos años cumple León hoy?', o:['8','9','10','11'], ok:2 },
+  { q:'¿Cuál es el color favorito de León?', o:['Azul','Rojo','Verde','Violeta'], ok:0 },
+  { q:'¿Qué le gusta comer a León?', o:['Ensalada','Hamburguesa 🍔','Sopa','Brócoli'], ok:1 },
+  { q:'¿A qué le gusta jugar a León?', o:['Ajedrez','Videojuegos 🎮','Golf','Damas'], ok:1 },
+  { q:'¿Cómo se llama la fiesta de hoy?', o:['LEON FEST 2026','Súper Party','Fiesta Total','Cumple Loco'], ok:0 },
+];
+
+/* ===== PREMIOS (editá qué gana · el último es la BICI) =====
+   Bajos a propósito: se llega a la bici en ~15 min de juego. */
+const PREMIOS=[
+  { estrellas:2,  emoji:'🎁', nombre:'Premio 1', desc:'(editá: qué gana León)' },
+  { estrellas:4,  emoji:'🎮', nombre:'Premio 2', desc:'(editá)' },
+  { estrellas:6,  emoji:'🍔', nombre:'Premio 3', desc:'(editá)' },
+  { estrellas:9,  emoji:'⚽', nombre:'Premio 4', desc:'(editá)' },
+  { estrellas:12, emoji:'🚲', nombre:'¡LA BICI!', desc:'El regalo más especial de todos', bici:true },
+];
+
+/* ===== TÍTULOS / RANGOS (abiertos) =====
+   Suben con las estrellas y siguen MÁS ALLÁ de la bici.
+   A futuro podés colgarle un premio nuevo a cualquiera. */
+const TITULOS=[
+  { estrellas:0,  emoji:'🐣', nombre:'Novato' },
+  { estrellas:3,  emoji:'🎮', nombre:'Aventurero' },
+  { estrellas:6,  emoji:'🔥', nombre:'Crack' },
+  { estrellas:12, emoji:'🏆', nombre:'Campeón' },
+  { estrellas:18, emoji:'⭐', nombre:'Súper Crack' },
+  { estrellas:26, emoji:'👑', nombre:'Leyenda' },
+  { estrellas:33, emoji:'🦁', nombre:'Máster León' },
+];
+
+/* ===== RÉCORDS + ESTRELLAS (persisten) ===== */
+const DEF={ snakeBest:0, tttW:0, tttL:0, tttD:0, triviaBest:0,
+  snakeLevel:0, memoriaLevel:0, autosLevel:0, basquetLevel:0, naveLevel:0, boxeoLevel:0, premiosVistos:0 };
+const Scores={
+  data:Object.assign({},DEF),
+  load(){ try{ const s=localStorage.getItem('leonfest_v4'); if(s) this.data=Object.assign({},DEF,JSON.parse(s)); }catch(e){} },
+  save(){ try{ localStorage.setItem('leonfest_v4', JSON.stringify(this.data)); }catch(e){} },
+  reset(){ this.data=Object.assign({},DEF); this.save(); }
+};
+Scores.load();
+
+function totalEstrellas(){
+  const d=Scores.data, total=PREGUNTAS.length;
+  const ttt=Math.min(d.tttW,5);
+  const tri=d.triviaBest>=total?3:(d.triviaBest>=Math.ceil(total/2)?1:0);
+  return d.snakeLevel+d.memoriaLevel+d.autosLevel+d.basquetLevel+d.naveLevel+d.boxeoLevel+ttt+tri; // máx 38
+}
+function tituloActual(est){ let t=TITULOS[0]; TITULOS.forEach(x=>{ if(est>=x.estrellas) t=x; }); return t; }
+function tituloSiguiente(est){ return TITULOS.find(x=>x.estrellas>est)||null; }
+
+function awardLevel(game, level){
+  const k=game+'Level'; if(Scores.data[k]===undefined) return;
+  if(level>Scores.data[k]) Scores.data[k]=level;
+  Scores.save(); checkPremios();
+}
+function checkPremios(){
+  const est=totalEstrellas();
+  let unlocked=0; PREMIOS.forEach(p=>{ if(est>=p.estrellas) unlocked++; });
+  if(unlocked>Scores.data.premiosVistos){ const nuevo=PREMIOS[unlocked-1]; Scores.data.premiosVistos=unlocked; Scores.save(); celebrarPremio(nuevo); }
+  if(document.getElementById('tab-premios').classList.contains('active')){ renderPremios(); renderScores(); }
+}
+function celebrarPremio(p){
+  document.getElementById('celEmoji').textContent=p.emoji;
+  document.getElementById('celTitle').textContent=p.bici?'¡GANASTE LA BICI!':'¡PREMIO DESBLOQUEADO!';
+  document.getElementById('celDesc').innerHTML=`<b>${p.nombre}</b><br>${p.desc}`;
+  document.getElementById('celebra').classList.add('open'); burst(p.bici?260:160);
+}
+function renderPremios(){
+  const est=totalEstrellas();
+  const t=tituloActual(est), tn=tituloSiguiente(est);
+  const next=PREMIOS.find(p=>est<p.estrellas);
+  const goal=next?next.estrellas:PREMIOS[PREMIOS.length-1].estrellas;
+  const pct=Math.min(100, Math.round(est/goal*100));
+  const rows=PREMIOS.map(p=>{
+    const open=est>=p.estrellas; const falta=p.estrellas-est;
+    return `<div class="premio-row ${open?'open':''} ${p.bici?'bici':''}">
+      <div class="pem">${open?p.emoji:'🔒'}</div>
+      <div class="pbody"><div class="pname">${p.bici?('🚲 '+p.nombre):(open?p.nombre:'Premio misterioso')}</div>
+        <div class="pdesc">${open?p.desc:('Necesitás '+p.estrellas+' ⭐')}</div></div>
+      <div class="ptag ${open?'win':'lock'}">${open?'¡Ganado!':('Faltan '+falta+' ⭐')}</div></div>`;
+  }).join('');
+  document.getElementById('premiosHost').innerHTML=`
+    <div class="star-head">
+      <div class="rango">${t.emoji} ${t.nombre}</div>
+      <div class="star-count">⭐ ${est} <span style="font-size:18px;color:var(--muted)">estrellas</span></div>
+      <div class="progress"><div class="fill" style="width:${pct}%"></div></div>
+      <div class="next-lbl">${next?('Faltan '+(next.estrellas-est)+' ⭐ para el próximo premio'):'¡Desbloqueaste todos los premios! 🎉'}</div>
+      <div class="next-lbl" style="margin-top:4px">${tn?('Próximo título: '+tn.emoji+' '+tn.nombre+' (faltan '+(tn.estrellas-est)+' ⭐)'):'¡Título máximo alcanzado! 👑'}</div>
+    </div>
+    <div class="roadmap">${rows}</div>
+    <p class="sec-sub" style="margin:20px 0 2px">Tus récords</p>`;
+}
+function renderScores(){
+  const d=Scores.data;
+  const rows=[
+    { ic:'🐍', g:'Viborita', r:`Récord: <b>${d.snakeBest}</b> 🍎 · Nivel: <b>${d.snakeLevel}</b>/5` },
+    { ic:'🃏', g:'Memoria', r:`Nivel: <b>${d.memoriaLevel}</b>/5` },
+    { ic:'🏎️', g:'Autitos', r:`Nivel: <b>${d.autosLevel}</b>/5` },
+    { ic:'🏀', g:'Básquet', r:`Nivel: <b>${d.basquetLevel}</b>/5` },
+    { ic:'🚀', g:'Nave', r:`Nivel: <b>${d.naveLevel}</b>/5` },
+    { ic:'🥊', g:'Boxeo', r:`Round máx: <b>${d.boxeoLevel}</b>/5` },
+    { ic:'⭕', g:'Ta-Te-Ti', r:`Ganó León: <b>${d.tttW}</b> · Compu: <b>${d.tttL}</b> · Empates: <b>${d.tttD}</b>` },
+    { ic:'❓', g:'Trivia', r:`Mejor: <b>${d.triviaBest}</b>/${PREGUNTAS.length}` },
+  ];
+  document.getElementById('scoreList').innerHTML=rows.map(x=>`<div class="score-card"><div class="sic">${x.ic}</div><div><div class="game">${x.g}</div><div class="rec">${x.r}</div></div></div>`).join('');
+}
+document.getElementById('scoreReset').onclick=()=>{ if(confirm('¿Borrar todo el progreso y récords?')){ Scores.reset(); renderPremios(); renderScores(); } };
+
+/* ===== FOTOS ===== */
+function renderGallery(){
+  document.getElementById('gallery').innerHTML=FOTOS.map((f,i)=>`
+    <div class="gtile" onclick="openPhoto(${i})">
+      <img src="${f.src}" alt="${f.cap}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none"><div class="e">📷</div><small>foto ${i+1}<br>(${f.src})</small></div>
+      <div class="cap">${f.cap}</div></div>`).join('');
+}
+function openPhoto(i){
+  const f=FOTOS[i];
+  modalHost.innerHTML=`<div class="lightbox"><img src="${f.src}" alt="${f.cap}" onerror="this.outerHTML='<div style=&quot;padding:40px;text-align:center;font-size:60px&quot;>📷</div>'"><p>${f.cap}</p></div>`;
+  modal.classList.add('open');
+}
+
+/* ===== NAV ===== */
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.id==='tab-'+name));
+  document.querySelectorAll('.tabbar button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  if(name==='premios'){ renderPremios(); renderScores(); }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.querySelectorAll('.tabbar button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+/* ===== MODAL ===== */
+const modal=document.getElementById('modal'), modalHost=document.getElementById('modalHost');
+let cleanup=null;
+function openGame(id){
+  if(cleanup){ cleanup(); cleanup=null; } modalHost.innerHTML=''; modal.classList.add('open');
+  ({memoria:Memoria, snake:Snake, autos:Autos, basquet:Basquet, nave:Nave, boxeo:Boxeo, ttt:Tateti, trivia:Trivia})[id](modalHost);
+}
+function closeModal(){ modal.classList.remove('open'); if(cleanup){ cleanup(); cleanup=null; } modalHost.innerHTML=''; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+/* helper: rectángulo redondeado */
+function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+
+/* ============================================================
+   MEMORIA · 5 niveles
+   ============================================================ */
+const MEM_EMOJIS=['🎂','🎈','🎁','🦁','🎮','🍔','🌟','🍕','🚗','🏀','🐶','🐱','🍦','🎸','⚽','🚀','🦖','🍩','🐢','🎯'];
+const MEM_LEVELS=[ {pairs:6,cols:4}, {pairs:8,cols:4}, {pairs:10,cols:5}, {pairs:12,cols:6}, {pairs:15,cols:6} ];
+function Memoria(el){
+  let level=1;
+  el.innerHTML=`<h2>🃏 Memoria</h2>
+    <div class="hud"><span class="lv" id="mLv"></span><span>Jugadas: <span class="stat" id="mMoves">0</span></span>
+      <button class="btn alt" id="mReset" style="padding:6px 12px;font-size:13px">Reiniciar</button></div>
+    <div class="mem-grid" id="mGrid"></div><div class="banner" id="mBanner"></div>`;
+  const grid=el.querySelector('#mGrid'), banner=el.querySelector('#mBanner');
+  el.querySelector('#mReset').onclick=()=>{ level=1; build(); };
+  let first,lock,pairs,moves,need,fs;
+  function build(){
+    const cfg=MEM_LEVELS[level-1];
+    el.querySelector('#mLv').textContent='Nivel '+level+'/5'; el.querySelector('#mMoves').textContent='0';
+    banner.textContent=''; first=null; lock=false; pairs=0; moves=0; need=cfg.pairs;
+    fs = cfg.cols<=4?28:(cfg.cols===5?23:19);
+    const pool=[...MEM_EMOJIS].sort(()=>Math.random()-0.5).slice(0,cfg.pairs);
+    const deck=[...pool,...pool].sort(()=>Math.random()-0.5);
+    grid.style.gridTemplateColumns=`repeat(${cfg.cols},1fr)`; grid.innerHTML='';
+    deck.forEach(sym=>{ const c=document.createElement('div'); c.className='mem-card'; c.dataset.sym=sym; c.textContent=sym; c.style.fontSize=fs+'px'; c.onclick=()=>flip(c); grid.appendChild(c); });
+  }
+  function flip(c){
+    if(lock||c.classList.contains('show')||c.classList.contains('done'))return;
+    c.classList.add('show');
+    if(!first){ first=c; return; }
+    moves++; el.querySelector('#mMoves').textContent=moves;
+    if(first.dataset.sym===c.dataset.sym){ first.classList.add('done'); c.classList.add('done'); first=null; pairs++; if(pairs===need) levelDone(); }
+    else{ lock=true; const a=first,b=c; first=null; setTimeout(()=>{ a.classList.remove('show'); b.classList.remove('show'); lock=false; },700); }
+  }
+  function levelDone(){
+    awardLevel('memoria', level); burst();
+    if(level<5){ banner.innerHTML=`¡Nivel ${level} listo! ⭐`;
+      const b=document.createElement('button'); b.className='btn mt'; b.textContent='Siguiente nivel ▶'; b.onclick=()=>{ level++; build(); };
+      banner.appendChild(document.createElement('br')); banner.appendChild(b);
+    }else banner.innerHTML=`🏆 ¡Completaste la Memoria! 5 ⭐`;
+  }
+  build();
+}
+
+/* ============================================================
+   VIBORITA · 5 niveles · traspasa paredes · (más lenta y fácil)
+   ============================================================ */
+const SNAKE_LEVELS=[
+  { meta:6,  speed:165, obst:0 },
+  { meta:8,  speed:150, obst:2 },
+  { meta:10, speed:138, obst:4 },
+  { meta:12, speed:127, obst:6 },
+  { meta:14, speed:116, obst:9 },
+];
+function Snake(el){
+  el.innerHTML=`<h2>🐍 Viborita</h2>
+    <p class="lead">Atravesás las paredes. Comé 🍎 y evitá tu cola y los bloques.</p>
+    <div class="hud"><span class="lv" id="sLv"></span><span>🍎 <span class="stat" id="sMeta">0</span></span><span>Total: <span class="stat" id="sScore">0</span></span></div>
+    <canvas id="snakeCanvas" width="300" height="300"></canvas>
+    <div class="dpad"><span class="sp"></span><button class="btn" data-d="up">▲</button><span class="sp"></span>
+      <button class="btn" data-d="left">◀</button><button class="btn alt" id="sPause">⏸</button><button class="btn" data-d="right">▶</button>
+      <span class="sp"></span><button class="btn" data-d="down">▼</button><span class="sp"></span></div>
+    <div class="banner" id="sBanner"></div>`;
+  const cv=el.querySelector('#snakeCanvas'), ctx=cv.getContext('2d'); const N=15, S=cv.width/N;
+  let level,metaCount,score,snake,dir,nextDir,food,obst,alive,paused,loop,done;
+  function startLevel(l){
+    level=l; const cfg=SNAKE_LEVELS[l-1];
+    metaCount=0; snake=[{x:7,y:7}]; dir={x:1,y:0}; nextDir=dir; alive=true; paused=false; done=false;
+    obst=genObst(cfg.obst); placeFood();
+    el.querySelector('#sLv').textContent='Nivel '+l+'/5'; el.querySelector('#sMeta').textContent='0/'+cfg.meta; el.querySelector('#sBanner').textContent='';
+    if(loop) clearInterval(loop); loop=setInterval(step,cfg.speed); draw();
+  }
+  function genObst(n){ const set=new Set(); let tries=0;
+    while(set.size<n && tries<400){ tries++; const x=(Math.random()*N)|0, y=(Math.random()*N)|0;
+      if(Math.abs(y-7)<=1) continue; if(x===7&&y===7) continue; set.add(x+','+y); } return set; }
+  function placeFood(){ do{ food={x:(Math.random()*N)|0,y:(Math.random()*N)|0}; } while(snake.some(s=>s.x===food.x&&s.y===food.y) || obst.has(food.x+','+food.y)); }
+  function step(){
+    if(!alive||paused||done)return; dir=nextDir;
+    let hx=(snake[0].x+dir.x+N)%N, hy=(snake[0].y+dir.y+N)%N; const head={x:hx,y:hy};
+    if(snake.some(s=>s.x===hx&&s.y===hy) || obst.has(hx+','+hy)){ alive=false; el.querySelector('#sBanner').innerHTML=`<span style="color:var(--magenta)">¡Perdiste!</span>`; addRetry(); return; }
+    snake.unshift(head);
+    if(hx===food.x&&hy===food.y){
+      score=(score||0)+1; metaCount++; el.querySelector('#sScore').textContent=score;
+      const cfg=SNAKE_LEVELS[level-1]; el.querySelector('#sMeta').textContent=metaCount+'/'+cfg.meta;
+      if(score>(Scores.data.snakeBest||0)){ Scores.data.snakeBest=score; Scores.save(); }
+      if(metaCount>=cfg.meta){ levelUp(); return; } placeFood();
+    }else snake.pop();
+    draw();
+  }
+  function levelUp(){
+    awardLevel('snake', level); burst();
+    if(level<5){ done=true; if(loop) clearInterval(loop); const bn=el.querySelector('#sBanner'); bn.innerHTML=`¡Nivel ${level} superado! ⭐`;
+      const b=document.createElement('button'); b.className='btn mt'; b.textContent='Nivel '+(level+1)+' ▶'; b.onclick=()=>startLevel(level+1);
+      bn.appendChild(document.createElement('br')); bn.appendChild(b);
+    }else{ done=true; if(loop) clearInterval(loop); el.querySelector('#sBanner').innerHTML=`🏆 ¡Ganaste la Viborita! 5 ⭐`; }
+  }
+  function addRetry(){ if(loop) clearInterval(loop); const bn=el.querySelector('#sBanner');
+    const b=document.createElement('button'); b.className='btn alt mt'; b.textContent='Reintentar nivel'; b.onclick=()=>startLevel(level);
+    bn.appendChild(document.createElement('br')); bn.appendChild(b); }
+  function draw(){
+    ctx.fillStyle='#0a0416'; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#5b3a8a'; obst.forEach(k=>{ const [x,y]=k.split(',').map(Number); ctx.fillRect(x*S+1,y*S+1,S-2,S-2); });
+    ctx.fillStyle='#ff2e9a'; ctx.fillRect(food.x*S+2,food.y*S+2,S-4,S-4);
+    snake.forEach((s,i)=>{ ctx.fillStyle=i===0?'#8cff5a':'#26e8ff'; ctx.fillRect(s.x*S+1,s.y*S+1,S-2,S-2); });
+  }
+  function setDir(d){ const m={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}}[d]; if(!m)return; if(m.x===-dir.x&&m.y===-dir.y)return; nextDir=m; }
+  function key(e){ const map={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right'}; if(map[e.key]){ e.preventDefault(); setDir(map[e.key]); } }
+  el.querySelectorAll('.dpad [data-d]').forEach(b=>b.onclick=()=>setDir(b.dataset.d));
+  el.querySelector('#sPause').onclick=()=>{ if(!alive||done)return; paused=!paused; el.querySelector('#sPause').textContent=paused?'▶':'⏸'; };
+  let tx,ty;
+  cv.addEventListener('touchstart',e=>{const t=e.touches[0];tx=t.clientX;ty=t.clientY;},{passive:true});
+  cv.addEventListener('touchend',e=>{ const t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty; if(Math.abs(dx)>Math.abs(dy)) setDir(dx>0?'right':'left'); else setDir(dy>0?'down':'up'); },{passive:true});
+  document.addEventListener('keydown',key);
+  score=0; el.querySelector('#sScore').textContent='0'; startLevel(1);
+  cleanup=()=>{ if(loop) clearInterval(loop); document.removeEventListener('keydown',key); };
+}
+
+/* ============================================================
+   AUTITOS · vista DESDE ARRIBA · 5 niveles (más fácil)
+   ============================================================ */
+const AUTO_LEVELS=[
+  { meta:6,  speed:1.9, spawn:1300 },
+  { meta:8,  speed:2.3, spawn:1150 },
+  { meta:10, speed:2.7, spawn:1000 },
+  { meta:12, speed:3.2, spawn:880 },
+  { meta:14, speed:3.8, spawn:760 },
+];
+function Autos(el){
+  el.innerHTML=`<h2>🏎️ Autitos</h2>
+    <p class="lead">Vista desde arriba. Esquivá los autos cambiando de carril.</p>
+    <div class="hud"><span class="lv" id="aLv"></span><span>Esquivados: <span class="stat" id="aMeta">0</span></span></div>
+    <canvas id="autoCanvas" width="300" height="380"></canvas>
+    <div class="lr"><button class="btn" id="aL">◀</button><button class="btn" id="aR">▶</button></div>
+    <div class="banner" id="aBanner"></div>`;
+  const cv=el.querySelector('#autoCanvas'), ctx=cv.getContext('2d');
+  const W=cv.width, H=cv.height, LANES=[50,150,250], playerY=H-52;
+  const COLORS=['#ff2e9a','#b14bff','#ffe14d','#ff7a1a','#8cff5a'];
+  let level,lane,cars,dodged,alive,done,speed,spawnMs,spawnT,raf,last,roadOff=0;
+  function startLevel(l){
+    level=l; const cfg=AUTO_LEVELS[l-1];
+    lane=1; cars=[]; dodged=0; alive=true; done=false; speed=cfg.speed; spawnMs=cfg.spawn; spawnT=0; last=performance.now();
+    el.querySelector('#aLv').textContent='Nivel '+l+'/5'; el.querySelector('#aMeta').textContent='0/'+cfg.meta; el.querySelector('#aBanner').textContent='';
+    if(raf) cancelAnimationFrame(raf); raf=requestAnimationFrame(frame);
+  }
+  function frame(now){
+    const dt=Math.min(50, now-last); last=now;
+    if(alive && !done){
+      spawnT+=dt; if(spawnT>=spawnMs){ spawnT=0; spawnCar(); }
+      const cfg=AUTO_LEVELS[level-1];
+      for(let i=cars.length-1;i>=0;i--){ const c=cars[i]; c.y+=speed*(dt/16.7);
+        if(c.lane===lane && Math.abs(c.y-playerY)<36){ crash(); return; }
+        if(c.y>H+34){ cars.splice(i,1); dodged++; el.querySelector('#aMeta').textContent=dodged+'/'+cfg.meta; if(dodged>=cfg.meta){ levelUp(); return; } } }
+    }
+    draw(); raf=requestAnimationFrame(frame);
+  }
+  function spawnCar(){ const ln=(Math.random()*3)|0; if(cars.some(c=>c.lane===ln && c.y<60)) return; cars.push({ lane:ln, y:-40, color:COLORS[(Math.random()*COLORS.length)|0] }); }
+  function carDraw(cx,cy,color,isPlayer){
+    const w=42,h=64;
+    ctx.fillStyle='#0a0416'; ctx.fillRect(cx-w/2-3,cy-h/2+8,4,12); ctx.fillRect(cx+w/2-1,cy-h/2+8,4,12); ctx.fillRect(cx-w/2-3,cy+h/2-20,4,12); ctx.fillRect(cx+w/2-1,cy+h/2-20,4,12);
+    ctx.fillStyle=color; rr(ctx,cx-w/2,cy-h/2,w,h,8); ctx.fill();
+    ctx.fillStyle='rgba(10,4,22,.55)'; if(isPlayer) rr(ctx,cx-w/2+6,cy-h/2+7,w-12,16,4); else rr(ctx,cx-w/2+6,cy+h/2-23,w-12,16,4); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.16)'; rr(ctx,cx-w/2+8,cy-6,w-16,12,3); ctx.fill();
+  }
+  function draw(){
+    ctx.fillStyle='#191026'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#0a0416'; ctx.fillRect(0,0,6,H); ctx.fillRect(W-6,0,6,H);
+    roadOff=(roadOff+speed*2)%40; ctx.strokeStyle='rgba(255,225,77,.5)'; ctx.lineWidth=4; ctx.setLineDash([20,20]); ctx.lineDashOffset=-roadOff;
+    [100,200].forEach(x=>{ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }); ctx.setLineDash([]);
+    cars.forEach(c=>carDraw(LANES[c.lane], c.y, c.color, false));
+    carDraw(LANES[lane], playerY, '#26e8ff', true);
+  }
+  function crash(){ alive=false; el.querySelector('#aBanner').innerHTML=`<span style="color:var(--magenta)">¡Chocaste! 💥</span>`; addRetry(); }
+  function levelUp(){ awardLevel('autos', level); burst(); done=true; const bn=el.querySelector('#aBanner');
+    if(level<5){ bn.innerHTML=`¡Nivel ${level} superado! ⭐`; const b=document.createElement('button'); b.className='btn mt'; b.textContent='Nivel '+(level+1)+' ▶'; b.onclick=()=>startLevel(level+1); bn.appendChild(document.createElement('br')); bn.appendChild(b); }
+    else bn.innerHTML=`🏆 ¡Ganaste los Autitos! 5 ⭐`; }
+  function addRetry(){ const bn=el.querySelector('#aBanner'); const b=document.createElement('button'); b.className='btn alt mt'; b.textContent='Reintentar nivel'; b.onclick=()=>startLevel(level); bn.appendChild(document.createElement('br')); bn.appendChild(b); }
+  function move(d){ if(!alive||done)return; lane=Math.max(0,Math.min(2,lane+d)); }
+  el.querySelector('#aL').onclick=()=>move(-1); el.querySelector('#aR').onclick=()=>move(1);
+  function key(e){ if(e.key==='ArrowLeft'||e.key==='a'){e.preventDefault();move(-1);} if(e.key==='ArrowRight'||e.key==='d'){e.preventDefault();move(1);} }
+  document.addEventListener('keydown',key);
+  cv.addEventListener('pointerdown',e=>{ const r=cv.getBoundingClientRect(); move((e.clientX-r.left)<r.width/2?-1:1); });
+  startLevel(1);
+  cleanup=()=>{ if(raf) cancelAnimationFrame(raf); document.removeEventListener('keydown',key); };
+}
+
+/* ============================================================
+   BÁSQUET · 5 niveles · aro más grande
+   ============================================================ */
+const BASKET_LEVELS=[ { meta:2, move:0 }, { meta:3, move:0.9 }, { meta:4, move:1.5 }, { meta:4, move:2.2 }, { meta:5, move:3.0 } ];
+function Basquet(el){
+  el.innerHTML=`<h2>🏀 Básquet</h2>
+    <p class="lead">Arrastrá la pelota hacia atrás y soltá para lanzar al aro.</p>
+    <div class="hud"><span class="lv" id="bLv"></span><span>Encestes: <span class="stat" id="bMeta">0</span></span></div>
+    <canvas id="basketCanvas" width="300" height="380"></canvas><div class="banner" id="bBanner"></div>`;
+  const cv=el.querySelector('#basketCanvas'), ctx=cv.getContext('2d');
+  const W=cv.width, H=cv.height, G=0.24, K=0.16; const baseX=W/2, baseY=H-30, R=15, RIM=26; // aro más grande
+  let level,made,ball,hoop,drag,aim,done,raf,prevY;
+  function startLevel(l){
+    level=l; const cfg=BASKET_LEVELS[l-1]; made=0; done=false; drag=false; aim=null;
+    ball={x:baseX,y:baseY,vx:0,vy:0,flying:false}; prevY=baseY; hoop={x:W/2+50,y:96,dir:1,move:cfg.move};
+    el.querySelector('#bLv').textContent='Nivel '+l+'/5'; el.querySelector('#bMeta').textContent='0/'+cfg.meta; el.querySelector('#bBanner').textContent='';
+    if(raf) cancelAnimationFrame(raf); raf=requestAnimationFrame(frame);
+  }
+  function resetBall(){ ball={x:baseX,y:baseY,vx:0,vy:0,flying:false}; prevY=baseY; }
+  function frame(){
+    if(hoop.move>0 && !done){ hoop.x+=hoop.move*hoop.dir; if(hoop.x>W-50){ hoop.x=W-50; hoop.dir=-1; } if(hoop.x<50){ hoop.x=50; hoop.dir=1; } }
+    if(ball.flying){ prevY=ball.y; ball.x+=ball.vx; ball.y+=ball.vy; ball.vy+=G;
+      if(ball.vy>0 && prevY<hoop.y && ball.y>=hoop.y && Math.abs(ball.x-hoop.x)<RIM){ scored(); }
+      else if(ball.y>H+40 || ball.x<-40 || ball.x>W+40){ resetBall(); } }
+    draw(); raf=requestAnimationFrame(frame);
+  }
+  function scored(){ made++; const cfg=BASKET_LEVELS[level-1]; el.querySelector('#bMeta').textContent=made+'/'+cfg.meta; resetBall(); if(made>=cfg.meta) levelUp(); else burst(40); }
+  function levelUp(){ awardLevel('basquet', level); burst(); done=true; const bn=el.querySelector('#bBanner');
+    if(level<5){ bn.innerHTML=`¡Nivel ${level} superado! ⭐`; const b=document.createElement('button'); b.className='btn mt'; b.textContent='Nivel '+(level+1)+' ▶'; b.onclick=()=>startLevel(level+1); bn.appendChild(document.createElement('br')); bn.appendChild(b); }
+    else bn.innerHTML=`🏆 ¡Ganaste el Básquet! 5 ⭐`; }
+  function draw(){
+    ctx.fillStyle='#0a0416'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#e7dcff'; ctx.fillRect(hoop.x-2, hoop.y-42, 4, 36); ctx.strokeStyle='#e7dcff'; ctx.lineWidth=3; ctx.strokeRect(hoop.x-32, hoop.y-42, 64, 32);
+    ctx.strokeStyle='#ff7a1a'; ctx.lineWidth=4; ctx.beginPath(); ctx.ellipse(hoop.x, hoop.y, RIM, 7, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=1; for(let i=-3;i<=3;i++){ ctx.beginPath(); ctx.moveTo(hoop.x+i*8, hoop.y+4); ctx.lineTo(hoop.x+i*4, hoop.y+22); ctx.stroke(); }
+    if(drag && aim){ ctx.strokeStyle='rgba(38,232,255,.8)'; ctx.setLineDash([6,6]); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(ball.x,ball.y); ctx.lineTo(2*ball.x-aim.x, 2*ball.y-aim.y); ctx.stroke(); ctx.setLineDash([]); }
+    ctx.font=(R*2)+'px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('🏀', ball.x, ball.y);
+  }
+  function pos(e){ const r=cv.getBoundingClientRect(); return { x:(e.clientX-r.left)*(W/r.width), y:(e.clientY-r.top)*(H/r.height) }; }
+  cv.addEventListener('pointerdown',e=>{ if(done||ball.flying)return; const p=pos(e); if(Math.hypot(p.x-ball.x,p.y-ball.y)<60){ drag=true; aim=p; } });
+  cv.addEventListener('pointermove',e=>{ if(drag){ aim=pos(e); } });
+  cv.addEventListener('pointerup',e=>{ if(!drag)return; drag=false; const p=pos(e); ball.vx=(ball.x-p.x)*K; ball.vy=(ball.y-p.y)*K; ball.flying=true; aim=null; });
+  cv.addEventListener('pointerleave',()=>{ if(drag){ drag=false; aim=null; } });
+  startLevel(1);
+  cleanup=()=>{ if(raf) cancelAnimationFrame(raf); };
+}
+
+/* ============================================================
+   NAVE · shooter espacial (tipo Galaga) · 5 niveles
+   ============================================================ */
+const NAVE_LEVELS=[
+  { meta:8,  espd:1.3, spawn:1150 },
+  { meta:12, espd:1.7, spawn:980 },
+  { meta:16, espd:2.1, spawn:850 },
+  { meta:20, espd:2.6, spawn:720 },
+  { meta:24, espd:3.2, spawn:600 },
+];
+function Nave(el){
+  el.innerHTML=`<h2>🚀 Nave</h2>
+    <p class="lead">Movete con ◀ ▶ y disparale a los extraterrestres con 🔥</p>
+    <div class="hud"><span class="lv" id="nLv"></span><span id="nLives">❤️❤️❤️</span><span>👾 <span class="stat" id="nMeta">0</span></span></div>
+    <canvas id="naveCanvas" width="300" height="380"></canvas>
+    <div class="lr"><button class="btn" id="nL">◀</button><button class="btn danger" id="nFire">🔥</button><button class="btn" id="nR">▶</button></div>
+    <div class="banner" id="nBanner"></div>`;
+  const cv=el.querySelector('#naveCanvas'), ctx=cv.getContext('2d'); const W=cv.width, H=cv.height, shipY=H-34;
+  const stars=Array.from({length:40},()=>({x:Math.random()*W,y:Math.random()*H,s:Math.random()*1.5+0.5}));
+  let level,kills,lives,shipX,bullets,enemies,alive,done,raf,last,spawnT,lastShot,moveL,moveR,firing;
+  function startLevel(l){
+    level=l; const cfg=NAVE_LEVELS[l-1];
+    kills=0; lives=3; shipX=W/2; bullets=[]; enemies=[]; alive=true; done=false; spawnT=0; lastShot=0; last=performance.now(); moveL=moveR=firing=false;
+    el.querySelector('#nLv').textContent='Nivel '+l+'/5'; el.querySelector('#nMeta').textContent='0/'+cfg.meta; el.querySelector('#nLives').textContent='❤️❤️❤️'; el.querySelector('#nBanner').textContent='';
+    if(raf) cancelAnimationFrame(raf); raf=requestAnimationFrame(frame);
+  }
+  function loseLife(){ lives--; el.querySelector('#nLives').textContent='❤️'.repeat(Math.max(0,lives))||'💀'; if(lives<=0){ gameOver(); } }
+  function gameOver(){ alive=false; el.querySelector('#nBanner').innerHTML=`<span style="color:var(--magenta)">¡Te alcanzaron! 👾</span>`; const bn=el.querySelector('#nBanner'); const b=document.createElement('button'); b.className='btn alt mt'; b.textContent='Reintentar nivel'; b.onclick=()=>startLevel(level); bn.appendChild(document.createElement('br')); bn.appendChild(b); }
+  function frame(now){
+    const dt=Math.min(50, now-last); last=now;
+    if(alive && !done){
+      const cfg=NAVE_LEVELS[level-1];
+      if(moveL) shipX-=4.2; if(moveR) shipX+=4.2; shipX=Math.max(20,Math.min(W-20,shipX));
+      if(firing && now-lastShot>240){ bullets.push({x:shipX,y:shipY-16}); lastShot=now; }
+      bullets.forEach(b=>b.y-=6); bullets=bullets.filter(b=>b.y>-10);
+      spawnT+=dt; if(spawnT>=cfg.spawn){ spawnT=0; enemies.push({x:20+Math.random()*(W-40), y:-16, ph:Math.random()*100}); }
+      for(let i=enemies.length-1;i>=0;i--){ const en=enemies[i]; en.y+=cfg.espd*(dt/16.7); en.x+=Math.sin((en.y+en.ph)/28)*1.1;
+        if(Math.hypot(en.x-shipX, en.y-shipY)<19){ enemies.splice(i,1); loseLife(); if(!alive) return; continue; }
+        if(en.y>H+16){ enemies.splice(i,1); continue; }   // si escapa por abajo NO penaliza
+        let hit=false;
+        for(let j=bullets.length-1;j>=0;j--){ if(Math.abs(bullets[j].x-en.x)<16 && Math.abs(bullets[j].y-en.y)<18){ bullets.splice(j,1); hit=true; break; } }
+        if(hit){ enemies.splice(i,1); kills++; el.querySelector('#nMeta').textContent=kills+'/'+cfg.meta; if(kills>=cfg.meta){ levelUp(); return; } }
+      }
+    }
+    draw(); raf=requestAnimationFrame(frame);
+  }
+  function levelUp(){ awardLevel('nave', level); burst(); done=true; const bn=el.querySelector('#nBanner');
+    if(level<5){ bn.innerHTML=`¡Nivel ${level} superado! ⭐`; const b=document.createElement('button'); b.className='btn mt'; b.textContent='Nivel '+(level+1)+' ▶'; b.onclick=()=>startLevel(level+1); bn.appendChild(document.createElement('br')); bn.appendChild(b); }
+    else bn.innerHTML=`🏆 ¡Ganaste la Nave! 5 ⭐`; }
+  function draw(){
+    ctx.fillStyle='#05030f'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(255,255,255,.7)'; stars.forEach(st=>{ st.y+=0.6; if(st.y>H){ st.y=0; st.x=Math.random()*W; } ctx.fillRect(st.x,st.y,st.s,st.s); });
+    ctx.fillStyle='#ffe14d'; bullets.forEach(b=>ctx.fillRect(b.x-2,b.y-8,4,10));
+    ctx.font='26px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; enemies.forEach(en=>ctx.fillText('👾', en.x, en.y));
+    ctx.save(); ctx.translate(shipX,shipY); ctx.rotate(-Math.PI/4); ctx.font='30px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('🚀',0,0); ctx.restore();
+  }
+  const bind=(id,set)=>{ const b=el.querySelector(id); b.addEventListener('pointerdown',e=>{e.preventDefault(); set(true);}); ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>set(false))); };
+  bind('#nL',v=>moveL=v); bind('#nR',v=>moveR=v); bind('#nFire',v=>firing=v);
+  function kd(e){ if(e.key==='ArrowLeft'||e.key==='a'){moveL=true;} if(e.key==='ArrowRight'||e.key==='d'){moveR=true;} if(e.key===' '){e.preventDefault();firing=true;} }
+  function ku(e){ if(e.key==='ArrowLeft'||e.key==='a'){moveL=false;} if(e.key==='ArrowRight'||e.key==='d'){moveR=false;} if(e.key===' '){firing=false;} }
+  document.addEventListener('keydown',kd); document.addEventListener('keyup',ku);
+  startLevel(1);
+  cleanup=()=>{ if(raf) cancelAnimationFrame(raf); document.removeEventListener('keydown',kd); document.removeEventListener('keyup',ku); };
+}
+
+/* ============================================================
+   BOXEO · 5 rounds · cuerpo de boxeador genérico + tu cara
+   ------------------------------------------------------------
+   El juego dibuja un CUERPO de boxeador y le pega la CARA que
+   vos cargues como archivo en la carpeta  caras/  (mismo nivel
+   que este index). Nombres de archivo:
+     caras/chavo.png · caras/chilindrina.png · caras/kiko.png
+     caras/ramon.png · caras/florinda.png
+   Podés usar png con fondo transparente para que quede mejor.
+   Si falta un archivo, se usa un emoji de reemplazo.
+   ============================================================ */
+const BOX_PERSONAJES=[
+  { id:'chavo',       nombre:'El Chavo',       src:'caras/chavo.png',       emoji:'👦', trunk:'#8cff5a' },
+  { id:'chilindrina', nombre:'La Chilindrina', src:'caras/chilindrina.png', emoji:'👧', trunk:'#ff2e9a' },
+  { id:'kiko',        nombre:'Quico',          src:'caras/kiko.png',        emoji:'😗', trunk:'#26e8ff' },
+  { id:'ramon',       nombre:'Don Ramón',      src:'caras/ramon.png',       emoji:'🧔', trunk:'#ffe14d' },
+  { id:'florinda',    nombre:'Doña Florinda',  src:'caras/florinda.png',    emoji:'😠', trunk:'#b14bff' },
+];
+const BOX_LEVELS=[
+  { hp:55,  dmg:8,  intv:1650, spd:0.8 },
+  { hp:72,  dmg:11, intv:1450, spd:1.0 },
+  { hp:90,  dmg:15, intv:1250, spd:1.2 },
+  { hp:110, dmg:19, intv:1080, spd:1.4 },
+  { hp:130, dmg:24, intv:920,  spd:1.6 },
+];
+const boxImgs={};
+function loadFace(p){ if(boxImgs[p.id]) return boxImgs[p.id]; const o={ok:false,emoji:p.emoji,img:new Image()}; o.img.onload=()=>o.ok=true; o.img.onerror=()=>o.ok=false; o.img.src=p.src; boxImgs[p.id]=o; return o; }
+
+function Boxeo(el){
+  BOX_PERSONAJES.forEach(loadFace);
+  let chosen=null;
+  selectScreen();
+
+  function selectScreen(){
+    if(cleanup){ cleanup(); cleanup=null; }
+    el.innerHTML=`<h2>🥊 Boxeo</h2><p class="lead">Elegí tu personaje y ganá los 5 rounds.</p><div class="box-pick" id="boxPick"></div>`;
+    const grid=el.querySelector('#boxPick');
+    grid.innerHTML=BOX_PERSONAJES.map(p=>`
+      <div class="box-card" data-id="${p.id}">
+        <div class="box-face"><img src="${p.src}" alt="${p.nombre}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="box-ph" style="display:none">${p.emoji}</div></div>
+        <div class="box-nm">${p.nombre}</div></div>`).join('');
+    grid.querySelectorAll('.box-card').forEach(c=>c.onclick=()=>startFight(c.dataset.id,1));
+  }
+
+  function startFight(id, level){
+    if(cleanup){ cleanup(); cleanup=null; }
+    chosen=id;
+    const cfg=BOX_LEVELS[level-1];
+    const others=BOX_PERSONAJES.filter(p=>p.id!==id);
+    const opp=others[(level-1)%others.length];
+    const me=BOX_PERSONAJES.find(p=>p.id===id);
+    const meFace=loadFace(me), oppFace=loadFace(opp);
+
+    el.innerHTML=`<h2>🥊 Boxeo</h2>
+      <div class="hud"><span class="lv">Round ${level}/5</span><span>${me.nombre} vs ${opp.nombre}</span></div>
+      <canvas id="boxCanvas" width="300" height="330"></canvas>
+      <div class="lr" style="margin-top:12px"><button class="btn" id="bxL">◀</button><button class="btn" id="bxR">▶</button></div>
+      <div class="lr" style="margin-top:8px"><button class="btn danger" id="bxP">🥊 Golpe</button><button class="btn alt" id="bxB">🛡️ Bloqueo</button></div>
+      <div class="banner" id="bxBanner"></div>`;
+    const cv=el.querySelector('#boxCanvas'), ctx=cv.getContext('2d'); const W=cv.width,H=cv.height, floor=H-24;
+    let pHP=120, oHP=cfg.hp, px=95, ox=210, moveL=false, moveR=false, blocking=false;
+    let pPunch=0, pCd=0, oState='idle', oT=cfg.intv, oPunch=0, pHurt=0, oHurt=0, over=false, raf, last=performance.now(), pow=null;
+
+    function frame(now){
+      const dt=Math.min(50, now-last); last=now;
+      if(!over){
+        if(moveL) px-=2.6; if(moveR) px+=2.6; px=Math.max(40,Math.min(155,px));
+        if(pCd>0) pCd-=dt; if(pPunch>0) pPunch-=dt; if(pHurt>0) pHurt-=dt; if(oHurt>0) oHurt-=dt;
+        oT-=dt; const dist=ox-px;
+        if(oState==='idle'){
+          if(dist>92) ox-=cfg.spd*(dt/16.7); else if(dist<66) ox+=cfg.spd*(dt/16.7);
+          ox=Math.max(120,Math.min(262,ox));
+          if(oT<=0){ oState='windup'; oT=430; }
+        }else if(oState==='windup'){
+          if(oT<=0){ oState='punch'; oPunch=220;
+            if((ox-px)<95){
+              if(blocking){ pow={x:(px+ox)/2,y:floor-72,t:300,txt:'BLOCK'}; }
+              else { pHP-=cfg.dmg; pHurt=260; pow={x:(px+ox)/2,y:floor-72,t:320,txt:'¡AY!'}; if(pHP<=0){ pHP=0; lose(); } }
+            }
+          }
+        }else if(oState==='punch'){ oPunch-=dt; if(oPunch<=0){ oState='idle'; oT=cfg.intv; } }
+        if(pow){ pow.t-=dt; if(pow.t<=0) pow=null; }
+      }
+      draw(); raf=requestAnimationFrame(frame);
+    }
+    function punch(){
+      if(over||pCd>0||blocking) return; pPunch=220; pCd=340;
+      if((ox-px)<95){ oHP-=11; oHurt=240; ox=Math.min(262,ox+10); pow={x:(px+ox)/2,y:floor-72,t:320,txt:'¡POW!'}; if(oHP<=0){ oHP=0; win(); } }
+    }
+    function win(){ over=true; awardLevel('boxeo', level); burst(); const bn=el.querySelector('#bxBanner');
+      if(level<5){ bn.innerHTML=`¡Ganaste el round ${level}! ⭐`; const b=document.createElement('button'); b.className='btn mt'; b.textContent='Siguiente round ▶'; b.onclick=()=>startFight(chosen,level+1); bn.appendChild(document.createElement('br')); bn.appendChild(b); }
+      else bn.innerHTML=`🏆 ¡Campeón del Boxeo! 5 ⭐`; }
+    function lose(){ over=true; const bn=el.querySelector('#bxBanner'); bn.innerHTML=`<span style="color:var(--magenta)">¡Te noquearon! 🥴</span>`; const b=document.createElement('button'); b.className='btn alt mt'; b.textContent='Reintentar round'; b.onclick=()=>startFight(chosen,level); bn.appendChild(document.createElement('br')); bn.appendChild(b); }
+
+    function hpBar(x,w,hp,max,color){ ctx.fillStyle='#0a0416'; rr(ctx,x,12,w,12,6); ctx.fill(); ctx.fillStyle=color; rr(ctx,x,12,Math.max(0,w*hp/max),12,6); ctx.fill(); }
+    function drawBoxer(cx, face, facing, punchExt, hurt, trunk, blocking){
+      const bob=Math.sin(Date.now()/200)*2, y=floor;
+      const lean = hurt>0? -facing*7 : 0;
+      ctx.fillStyle='#3a2a5a'; ctx.fillRect(cx-12,y-44,9,44); ctx.fillRect(cx+3,y-44,9,44);         // piernas
+      ctx.strokeStyle='#e8b48a'; ctx.lineWidth=8; ctx.lineCap='round';                               // brazo trasero
+      ctx.beginPath(); ctx.moveTo(cx+lean,y-82); ctx.lineTo(cx-facing*12+lean,y-62); ctx.stroke();
+      ctx.fillStyle='#b81a34'; ctx.beginPath(); ctx.arc(cx-facing*12+lean,y-62,8,0,7); ctx.fill();
+      ctx.fillStyle=trunk; rr(ctx,cx-18+lean,y-90,36,48,10); ctx.fill();                              // torso/short
+      ctx.fillStyle='#e8b48a'; rr(ctx,cx-15+lean,y-98,30,18,7); ctx.fill();                           // pecho
+      const hy=y-104-bob;                                                                             // cabeza (cara)
+      if(face && face.ok){ const nat=face.img.naturalWidth/(face.img.naturalHeight||1); let hh=66, ww=Math.max(46,Math.min(80,hh*nat)); ctx.drawImage(face.img, cx-ww/2+lean, hy-hh, ww, hh); }
+      else { ctx.font='50px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(face&&face.emoji?face.emoji:'🙂', cx+lean, hy-28); }
+      if(blocking){                                                                                   // GUARDIA (bloqueo)
+        const gx=cx+facing*13+lean;
+        ctx.strokeStyle='#e8b48a'; ctx.lineWidth=8;
+        ctx.beginPath(); ctx.moveTo(cx+lean,y-80); ctx.lineTo(gx,y-86); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx+lean,y-70); ctx.lineTo(gx,y-66); ctx.stroke();
+        ctx.fillStyle='#e21e3a'; ctx.beginPath(); ctx.arc(gx,y-92,10,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(gx,y-70,10,0,7); ctx.fill();
+      }else{                                                                                          // brazo delantero / golpe
+        const reach=facing*(18+Math.max(0,punchExt)*48);
+        ctx.strokeStyle='#e8b48a'; ctx.lineWidth=9; ctx.beginPath(); ctx.moveTo(cx+lean,y-80); ctx.lineTo(cx+reach+lean,y-68); ctx.stroke();
+        ctx.fillStyle='#e21e3a'; ctx.beginPath(); ctx.arc(cx+reach+lean,y-68,10,0,7); ctx.fill();
+      }
+    }
+    function draw(){
+      ctx.fillStyle='#12203a'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#20325a'; ctx.fillRect(0,floor,W,H-floor);
+      ctx.strokeStyle='rgba(255,255,255,.22)'; ctx.lineWidth=3;
+      [0.34,0.58,0.82].forEach(f=>{ ctx.beginPath(); ctx.moveTo(0,floor*f); ctx.lineTo(W,floor*f); ctx.stroke(); });
+      const me=BOX_PERSONAJES.find(p=>p.id===chosen);
+      hpBar(10,120,pHP,120,'#8cff5a'); hpBar(W-130,120,oHP,cfg.hp,'#ff2e9a');
+      drawBoxer(ox, oppFace, -1, oState==='punch'?1:(oState==='windup'?-0.4:0), oHurt, opp.trunk, false);
+      drawBoxer(px, meFace, 1, pPunch>0?1:0, pHurt, me.trunk, blocking);
+      if(oState==='windup'){ ctx.fillStyle='#ffe14d'; ctx.font='700 20px "Baloo 2",serif'; ctx.textAlign='center'; ctx.fillText('¡!', ox, floor-150); }
+      if(pow){ ctx.font='700 26px "Baloo 2",serif'; ctx.textAlign='center'; ctx.fillStyle=pow.txt==='¡POW!'?'#ffe14d':(pow.txt==='BLOCK'?'#26e8ff':'#ff7a1a'); ctx.fillText(pow.txt,pow.x,pow.y); }
+    }
+    const bind=(id,set)=>{ const b=el.querySelector(id); b.addEventListener('pointerdown',e=>{e.preventDefault();set(true);}); ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>set(false))); };
+    bind('#bxL',v=>moveL=v); bind('#bxR',v=>moveR=v); bind('#bxB',v=>blocking=v);
+    el.querySelector('#bxP').addEventListener('pointerdown',e=>{e.preventDefault();punch();});
+    function kd(e){ if(e.key==='ArrowLeft'||e.key==='a')moveL=true; if(e.key==='ArrowRight'||e.key==='d')moveR=true; if(e.key==='ArrowDown'){e.preventDefault();blocking=true;} if(e.key===' '){e.preventDefault();punch();} }
+    function ku(e){ if(e.key==='ArrowLeft'||e.key==='a')moveL=false; if(e.key==='ArrowRight'||e.key==='d')moveR=false; if(e.key==='ArrowDown')blocking=false; }
+    document.addEventListener('keydown',kd); document.addEventListener('keyup',ku);
+    raf=requestAnimationFrame(frame);
+    cleanup=()=>{ if(raf) cancelAnimationFrame(raf); document.removeEventListener('keydown',kd); document.removeEventListener('keyup',ku); };
+  }
+}
+
+/* ============================================================
+   TA-TE-TI
+   ============================================================ */
+function Tateti(el){
+  const P='🦁', C='⭕'; let b=Array(9).fill(''), over=false;
+  el.innerHTML=`<h2>⭕ Ta-Te-Ti</h2><p class="lead">Vos sos 🦁, la compu es ⭕.</p>
+    <div class="ttt-grid" id="tGrid"></div><p class="center" id="tMsg" style="font-weight:800;min-height:26px"></p>
+    <div class="center"><button class="btn alt" id="tReset">Jugar de nuevo</button></div>`;
+  const grid=el.querySelector('#tGrid'), msg=el.querySelector('#tMsg');
+  b.forEach((_,i)=>{ const c=document.createElement('div'); c.className='ttt-cell'; c.onclick=()=>play(i); grid.appendChild(c); });
+  el.querySelector('#tReset').onclick=()=>Tateti(el);
+  const LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  function winner(bd){ for(const[a,c,d]of LINES) if(bd[a]&&bd[a]===bd[c]&&bd[a]===bd[d]) return bd[a]; return null; }
+  function render(){ grid.childNodes.forEach((c,i)=>c.textContent=b[i]); }
+  function play(i){ if(over||b[i])return; b[i]=P; render(); if(check())return; const m=cpu(); if(m>-1){ b[m]=C; render(); check(); } }
+  function check(){ const w=winner(b);
+    if(w){ over=true; if(w===P){ msg.innerHTML='<span style="color:var(--lime)">¡Ganaste! 🎉</span>'; Scores.data.tttW++; Scores.save(); checkPremios(); burst(); }
+      else{ msg.innerHTML='<span style="color:var(--magenta)">Ganó la compu 🤖</span>'; Scores.data.tttL++; Scores.save(); } return true; }
+    if(b.every(x=>x)){ over=true; msg.textContent='¡Empate! 🤝'; Scores.data.tttD++; Scores.save(); return true; } return false; }
+  function cpu(){ const find=w=>{ for(const[a,c,d]of LINES){ const l=[b[a],b[c],b[d]]; if(l.filter(x=>x===w).length===2&&l.includes('')) return [a,c,d][l.indexOf('')]; } return -1; };
+    let m=find(C); if(m>-1)return m; m=find(P); if(m>-1)return m; if(!b[4])return 4;
+    const cor=[0,2,6,8].filter(i=>!b[i]); if(cor.length)return cor[(Math.random()*cor.length)|0];
+    const fr=b.map((x,i)=>x?-1:i).filter(i=>i>-1); return fr.length?fr[(Math.random()*fr.length)|0]:-1; }
+  render();
+}
+
+/* ============================================================
+   TRIVIA
+   ============================================================ */
+function Trivia(el){
+  let i=0, score=0, locked=false;
+  el.innerHTML=`<h2>❓ Trivia de León</h2>
+    <p class="lead">Pregunta <span id="qNum">1</span> de ${PREGUNTAS.length} · Puntos: <span class="stat" id="qScore">0</span></p>
+    <div class="tri-q" id="qText"></div><div class="tri-opts" id="qOpts"></div><div class="center mt" id="qEnd"></div>`;
+  const qText=el.querySelector('#qText'), qOpts=el.querySelector('#qOpts');
+  function show(){ locked=false; const p=PREGUNTAS[i]; el.querySelector('#qNum').textContent=i+1; qText.textContent=p.q; qOpts.innerHTML=''; el.querySelector('#qEnd').innerHTML='';
+    p.o.forEach((opt,idx)=>{ const b=document.createElement('button'); b.className='tri-opt'; b.textContent=opt; b.onclick=()=>ans(b,idx,p.ok); qOpts.appendChild(b); }); }
+  function ans(btn,idx,ok){ if(locked)return; locked=true; const nodes=qOpts.querySelectorAll('.tri-opt'); nodes[ok].classList.add('ok'); if(idx===ok){ score++; el.querySelector('#qScore').textContent=score; } else btn.classList.add('no'); setTimeout(()=>{ i++; (i<PREGUNTAS.length)?show():end(); },900); }
+  function end(){ if(score>(Scores.data.triviaBest||0)){ Scores.data.triviaBest=score; Scores.save(); } checkPremios(); qText.textContent=''; qOpts.innerHTML=''; const perfect=score===PREGUNTAS.length;
+    el.querySelector('#qEnd').innerHTML=`<b style="color:var(--lime);font-size:22px">${perfect?'¡PERFECTO! 🏆':'¡Muy bien! 🎉'}</b><br><span class="lead">Acertaste ${score} de ${PREGUNTAS.length}</span><br><button class="btn mt" onclick="openGame('trivia')">Jugar otra vez</button>`;
+    if(perfect) burst(); }
+  show();
+}
+
+/* ===== CONFETTI ===== */
+const cc=document.getElementById('confetti'), cx=cc.getContext('2d'); let parts=[], anim=null;
+function sizeCanvas(){ cc.width=innerWidth; cc.height=innerHeight; } sizeCanvas(); addEventListener('resize',sizeCanvas);
+const COLORS=['#ff2e9a','#26e8ff','#b14bff','#ffe14d','#8cff5a'];
+function burst(n=120){ if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  for(let k=0;k<n;k++){ parts.push({ x:innerWidth/2, y:innerHeight/3, vx:(Math.random()-0.5)*10, vy:Math.random()*-9-3, g:0.28, s:6+Math.random()*7, r:Math.random()*6, col:COLORS[(Math.random()*COLORS.length)|0], life:120 }); }
+  if(!anim) tick(); }
+function tick(){ cx.clearRect(0,0,cc.width,cc.height);
+  parts.forEach(p=>{ p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.r+=0.2; p.life--; cx.save(); cx.translate(p.x,p.y); cx.rotate(p.r); cx.fillStyle=p.col; cx.fillRect(-p.s/2,-p.s/2,p.s,p.s); cx.restore(); });
+  parts=parts.filter(p=>p.life>0 && p.y<cc.height+40); anim = parts.length ? requestAnimationFrame(tick) : null; }
+
+/* arranque */
+renderGallery();
+addEventListener('load',()=>setTimeout(()=>burst(150),400));
+</script>
+</body>
+</html>
