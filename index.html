@@ -175,7 +175,7 @@ body::before{ content:""; position:fixed; inset:0; z-index:0; pointer-events:non
 .dots{ display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-top:12px }
 .dots .dot{ width:9px; height:9px; border-radius:50%; background:var(--panel2); border:2px solid var(--ink); cursor:pointer }
 .dots .dot.on{ background:var(--yellow) }
-.thumbs{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px }
+.thumbs{ display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-top:12px; max-height:190px; overflow-y:auto; padding-right:2px }
 .thumbs .th{ aspect-ratio:1/1; border-radius:10px; overflow:hidden; border:2px solid var(--ink); cursor:pointer; opacity:.55; background:#1a0d30;
   display:flex; align-items:center; justify-content:center; font-size:18px }
 .thumbs .th.on{ opacity:1; border-color:var(--yellow) }
@@ -261,21 +261,31 @@ body::before{ content:""; position:fixed; inset:0; z-index:0; pointer-events:non
    Podés agregar o borrar líneas libremente; el carrusel se adapta.
    El 'cap' (epígrafe) es opcional: si lo dejás vacío, no se muestra. */
 const FOTOS=[
-  { src:'fotos/1.jpg', cap:'' },
-  { src:'fotos/2.jpg', cap:'' },
-  { src:'fotos/3.jpg', cap:'' },
-  { src:'fotos/4.jpg', cap:'' },
-  { src:'fotos/5.jpg', cap:'' },
-  { src:'fotos/6.jpg', cap:'' },
+  { src:'fotos/1.jpg',  cap:'' }, { src:'fotos/2.jpg',  cap:'' },
+  { src:'fotos/3.jpg',  cap:'' }, { src:'fotos/4.jpg',  cap:'' },
+  { src:'fotos/5.jpg',  cap:'' }, { src:'fotos/6.jpg',  cap:'' },
+  { src:'fotos/7.jpg',  cap:'' }, { src:'fotos/8.jpg',  cap:'' },
+  { src:'fotos/9.jpg',  cap:'' }, { src:'fotos/10.jpg', cap:'' },
+  { src:'fotos/11.jpg', cap:'' }, { src:'fotos/12.jpg', cap:'' },
+  { src:'fotos/13.jpg', cap:'' }, { src:'fotos/14.jpg', cap:'' },
+  { src:'fotos/15.jpg', cap:'' }, { src:'fotos/16.jpg', cap:'' },
+  { src:'fotos/17.jpg', cap:'' }, { src:'fotos/18.jpg', cap:'' },
+  { src:'fotos/19.jpg', cap:'' }, { src:'fotos/20.jpg', cap:'' },
+  { src:'fotos/21.jpg', cap:'' }, { src:'fotos/22.jpg', cap:'' },
 ];
 
 /* ===== TRIVIA (editá · "ok" = índice correcto) ===== */
 const PREGUNTAS=[
-  { q:'¿Cuántos años cumple León hoy?', o:['8','9','10','11'], ok:2 },
-  { q:'¿Cuál es el color favorito de León?', o:['Azul','Rojo','Verde','Violeta'], ok:0 },
-  { q:'¿Qué le gusta comer a León?', o:['Ensalada','Hamburguesa 🍔','Sopa','Brócoli'], ok:1 },
-  { q:'¿A qué le gusta jugar a León?', o:['Ajedrez','Videojuegos 🎮','Golf','Damas'], ok:1 },
-  { q:'¿Cómo se llama la fiesta de hoy?', o:['LEON FEST 2026','Súper Party','Fiesta Total','Cumple Loco'], ok:0 },
+  { q:'¿Cuál fue tu primera palabra?', o:['Mamá','Agua','Papá'], ok:2 },
+  { q:'¿Cuáles fueron siempre tus dibujos favoritos?', o:['Caillou','La granja de Zenón','Bluey'], ok:1 },
+  { q:'¿Cuál es tu color favorito?', o:['Rojo','Amarillo','Naranja'], ok:2 },
+  { q:'¿Cuál es tu comida favorita?', o:['Panchos','Hamburguesas','Locro'], ok:1 },
+  { q:'¿Qué más le gustaba hacer a León chiquito?', o:['Colorear','Mirar dibus','Mojarse de pies a cabeza'], ok:2 },
+  { q:'Cuando papá te cambió el primer pañal, ¿de qué color era la caca?', o:['Negro','Verde','Amarillo'], ok:1 },
+  { q:'¿Qué canción te cantaba mamá a la hora de dormir?', o:['Te amo yo y tú a mí...','Chiquito dime por qué...','Luna lunera cascabelera...'], ok:2 },
+  { q:'Cuando aprendimos a leer con mamá, ¿cuál era tu cuento favorito?', o:['Los tres cerditos','La caperucita roja','Hansel y Gretel'], ok:1 },
+  { q:'¿Cuál es el mejor regalo que te hicimos?', o:['Susana','Playstation','Pileta'], ok:0 },
+  { q:'¿Pensás que tuviste lindos cumpleaños? ¿Cuál te gustó más?', o:['Ninguno','Los anteriores (decí cuál)','Este LEON FEST 2026'], ok:2 },
 ];
 
 /* ===== PREMIOS (editá qué gana · el último es la BICI) =====
@@ -303,7 +313,7 @@ const TITULOS=[
 
 /* ===== RÉCORDS + ESTRELLAS (persisten) ===== */
 const DEF={ snakeBest:0, tttW:0, tttL:0, tttD:0, triviaBest:0,
-  snakeLevel:0, memoriaLevel:0, autosLevel:0, basquetLevel:0, naveLevel:0, boxeoLevel:0, premiosVistos:0 };
+  snakeLevel:0, memoriaLevel:0, autosLevel:0, basquetLevel:0, naveLevel:0, boxeoLevel:0, triviaLevel:0, premiosVistos:0 };
 const Scores={
   data:Object.assign({},DEF),
   load(){ try{ const s=localStorage.getItem('leonfest_v4'); if(s) this.data=Object.assign({},DEF,JSON.parse(s)); }catch(e){} },
@@ -313,10 +323,9 @@ const Scores={
 Scores.load();
 
 function totalEstrellas(){
-  const d=Scores.data, total=PREGUNTAS.length;
+  const d=Scores.data;
   const ttt=Math.min(d.tttW,5);
-  const tri=d.triviaBest>=total?3:(d.triviaBest>=Math.ceil(total/2)?1:0);
-  return d.snakeLevel+d.memoriaLevel+d.autosLevel+d.basquetLevel+d.naveLevel+d.boxeoLevel+ttt+tri; // máx 38
+  return d.snakeLevel+d.memoriaLevel+d.autosLevel+d.basquetLevel+d.naveLevel+d.boxeoLevel+d.triviaLevel+ttt; // máx 40
 }
 function tituloActual(est){ let t=TITULOS[0]; TITULOS.forEach(x=>{ if(est>=x.estrellas) t=x; }); return t; }
 function tituloSiguiente(est){ return TITULOS.find(x=>x.estrellas>est)||null; }
@@ -373,7 +382,7 @@ function renderScores(){
     { ic:'🚀', g:'Nave', r:`Nivel: <b>${d.naveLevel}</b>/5` },
     { ic:'🥊', g:'Boxeo', r:`Round máx: <b>${d.boxeoLevel}</b>/5` },
     { ic:'⭕', g:'Ta-Te-Ti', r:`Ganó León: <b>${d.tttW}</b> · Compu: <b>${d.tttL}</b> · Empates: <b>${d.tttD}</b>` },
-    { ic:'❓', g:'Trivia', r:`Mejor: <b>${d.triviaBest}</b>/${PREGUNTAS.length}` },
+    { ic:'❓', g:'Trivia', r:`Nivel: <b>${d.triviaLevel}</b>/5 · Aciertos: <b>${d.triviaBest}</b>/${PREGUNTAS.length}` },
   ];
   document.getElementById('scoreList').innerHTML=rows.map(x=>`<div class="score-card"><div class="sic">${x.ic}</div><div><div class="game">${x.g}</div><div class="rec">${x.r}</div></div></div>`).join('');
 }
@@ -396,7 +405,7 @@ function renderGallery(){
       <button class="nav next" onclick="carMove(1)" aria-label="Siguiente">›</button>`:''}
       ${f.cap?`<div class="cap">${f.cap}</div>`:''}
     </div>
-    <div class="dots">${FOTOS.map((_,i)=>`<div class="dot ${i===carIdx?'on':''}" onclick="carGo(${i})"></div>`).join('')}</div>
+    <div class="dots" style="font-weight:800;color:var(--muted);font-size:14px">${carIdx+1} / ${FOTOS.length}</div>
     <div class="thumbs">${FOTOS.map((x,i)=>`<div class="th ${i===carIdx?'on':''}" onclick="carGo(${i})">
       <img src="${x.src}" alt="" onerror="this.style.display='none';this.parentNode.textContent='📷'"></div>`).join('')}</div>`;
   const st=host.querySelector('#carStage');
@@ -898,16 +907,48 @@ function Tateti(el){
    ============================================================ */
 function Trivia(el){
   let i=0, score=0, locked=false;
+  const TOTAL=PREGUNTAS.length, PORNIVEL=2;               // 10 preguntas = 5 niveles
   el.innerHTML=`<h2>❓ Trivia de León</h2>
-    <p class="lead">Pregunta <span id="qNum">1</span> de ${PREGUNTAS.length} · Puntos: <span class="stat" id="qScore">0</span></p>
-    <div class="tri-q" id="qText"></div><div class="tri-opts" id="qOpts"></div><div class="center mt" id="qEnd"></div>`;
-  const qText=el.querySelector('#qText'), qOpts=el.querySelector('#qOpts');
-  function show(){ locked=false; const p=PREGUNTAS[i]; el.querySelector('#qNum').textContent=i+1; qText.textContent=p.q; qOpts.innerHTML=''; el.querySelector('#qEnd').innerHTML='';
-    p.o.forEach((opt,idx)=>{ const b=document.createElement('button'); b.className='tri-opt'; b.textContent=opt; b.onclick=()=>ans(b,idx,p.ok); qOpts.appendChild(b); }); }
-  function ans(btn,idx,ok){ if(locked)return; locked=true; const nodes=qOpts.querySelectorAll('.tri-opt'); nodes[ok].classList.add('ok'); if(idx===ok){ score++; el.querySelector('#qScore').textContent=score; } else btn.classList.add('no'); setTimeout(()=>{ i++; (i<PREGUNTAS.length)?show():end(); },900); }
-  function end(){ if(score>(Scores.data.triviaBest||0)){ Scores.data.triviaBest=score; Scores.save(); } checkPremios(); qText.textContent=''; qOpts.innerHTML=''; const perfect=score===PREGUNTAS.length;
-    el.querySelector('#qEnd').innerHTML=`<b style="color:var(--lime);font-size:22px">${perfect?'¡PERFECTO! 🏆':'¡Muy bien! 🎉'}</b><br><span class="lead">Acertaste ${score} de ${PREGUNTAS.length}</span><br><button class="btn mt" onclick="openGame('trivia')">Jugar otra vez</button>`;
-    if(perfect) burst(); }
+    <div class="hud"><span class="lv" id="qLv">Nivel 1/5</span><span>Pregunta <span class="stat" id="qNum">1</span>/${TOTAL}</span><span>✔ <span class="stat" id="qScore">0</span></span></div>
+    <div class="tri-q" id="qText"></div><div class="tri-opts" id="qOpts"></div>
+    <div class="banner" id="qBanner"></div><div class="center mt" id="qEnd"></div>`;
+  const qText=el.querySelector('#qText'), qOpts=el.querySelector('#qOpts'), banner=el.querySelector('#qBanner');
+  function nivelDe(idx){ return Math.min(5, Math.floor(idx/PORNIVEL)+1); }
+  function show(){
+    locked=false; const p=PREGUNTAS[i];
+    el.querySelector('#qNum').textContent=i+1;
+    el.querySelector('#qLv').textContent='Nivel '+nivelDe(i)+'/5';
+    qText.textContent=p.q; qOpts.innerHTML=''; banner.textContent=''; el.querySelector('#qEnd').innerHTML='';
+    p.o.forEach((opt,idx)=>{ const b=document.createElement('button'); b.className='tri-opt'; b.textContent=opt; b.onclick=()=>ans(b,idx,p.ok); qOpts.appendChild(b); });
+  }
+  function ans(btn,idx,ok){
+    if(locked)return; locked=true;
+    const nodes=qOpts.querySelectorAll('.tri-opt');
+    nodes[ok].classList.add('ok');
+    if(idx===ok){ score++; el.querySelector('#qScore').textContent=score; } else btn.classList.add('no');
+    const eraFinDeNivel=((i+1)%PORNIVEL===0);
+    setTimeout(()=>{
+      if(eraFinDeNivel){                                   // completó un nivel de 2 preguntas
+        const nivel=nivelDe(i);
+        awardLevel('trivia', nivel); burst();
+        if(score>(Scores.data.triviaBest||0)){ Scores.data.triviaBest=score; Scores.save(); }
+        i++;
+        if(i<TOTAL){
+          qText.textContent=''; qOpts.innerHTML='';
+          banner.innerHTML=`¡Nivel ${nivel} superado! ⭐`;
+          const b=document.createElement('button'); b.className='btn mt'; b.textContent='Nivel '+(nivel+1)+' ▶';
+          b.onclick=show; banner.appendChild(document.createElement('br')); banner.appendChild(b);
+        } else end();
+      } else { i++; show(); }
+    },900);
+  }
+  function end(){
+    if(score>(Scores.data.triviaBest||0)){ Scores.data.triviaBest=score; Scores.save(); }
+    checkPremios(); qText.textContent=''; qOpts.innerHTML=''; banner.textContent='';
+    const perfect=score===TOTAL;
+    el.querySelector('#qEnd').innerHTML=`<b style="color:var(--lime);font-size:22px">${perfect?'¡PERFECTO! 🏆':'🏆 ¡Completaste la Trivia! 5 ⭐'}</b><br><span class="lead">Acertaste ${score} de ${TOTAL}</span><br><button class="btn mt" onclick="openGame('trivia')">Jugar otra vez</button>`;
+    burst();
+  }
   show();
 }
 
