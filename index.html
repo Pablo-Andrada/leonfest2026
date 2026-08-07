@@ -594,11 +594,36 @@ function Autos(el){
   }
   function spawnCar(){ const ln=(Math.random()*3)|0; if(cars.some(c=>c.lane===ln && c.y<60)) return; cars.push({ lane:ln, y:-40, color:COLORS[(Math.random()*COLORS.length)|0] }); }
   function carDraw(cx,cy,color,isPlayer){
-    const w=42,h=64;
-    ctx.fillStyle='#0a0416'; ctx.fillRect(cx-w/2-3,cy-h/2+8,4,12); ctx.fillRect(cx+w/2-1,cy-h/2+8,4,12); ctx.fillRect(cx-w/2-3,cy+h/2-20,4,12); ctx.fillRect(cx+w/2-1,cy+h/2-20,4,12);
-    ctx.fillStyle=color; rr(ctx,cx-w/2,cy-h/2,w,h,8); ctx.fill();
-    ctx.fillStyle='rgba(10,4,22,.55)'; if(isPlayer) rr(ctx,cx-w/2+6,cy-h/2+7,w-12,16,4); else rr(ctx,cx-w/2+6,cy+h/2-23,w-12,16,4); ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,.16)'; rr(ctx,cx-w/2+8,cy-6,w-16,12,3); ctx.fill();
+    const w=44,h=72, top=cy-h/2, dir=isPlayer?-1:1;   // dir: -1 mira arriba, 1 mira abajo
+    // sombra
+    ctx.fillStyle='rgba(0,0,0,.35)'; rr(ctx,cx-w/2+3,top+5,w,h,11); ctx.fill();
+    // ruedas
+    ctx.fillStyle='#15121c';
+    rr(ctx,cx-w/2-3,top+11,7,16,3); ctx.fill();  rr(ctx,cx+w/2-4,top+11,7,16,3); ctx.fill();
+    rr(ctx,cx-w/2-3,top+h-27,7,16,3); ctx.fill(); rr(ctx,cx+w/2-4,top+h-27,7,16,3); ctx.fill();
+    // carrocería
+    ctx.fillStyle=color; rr(ctx,cx-w/2,top,w,h,11); ctx.fill();
+    // brillo lateral
+    ctx.fillStyle='rgba(255,255,255,.18)'; rr(ctx,cx-w/2+3,top+6,6,h-12,3); ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.14)';       rr(ctx,cx+w/2-9,top+6,6,h-12,3); ctx.fill();
+    // techo / cabina
+    ctx.fillStyle='rgba(10,4,22,.35)'; rr(ctx,cx-w/2+6,top+24,w-12,26,6); ctx.fill();
+    // parabrisas (adelante según dirección) y luneta
+    const frontY = dir===-1 ? top+13 : top+h-25;
+    const backY  = dir===-1 ? top+h-25 : top+13;
+    ctx.fillStyle='#9fd8ff'; rr(ctx,cx-w/2+7,frontY,w-14,13,4); ctx.fill();
+    ctx.fillStyle='rgba(159,216,255,.55)'; rr(ctx,cx-w/2+8,backY,w-16,11,4); ctx.fill();
+    // espejos
+    ctx.fillStyle=color; const my = dir===-1 ? top+26 : top+h-32;
+    rr(ctx,cx-w/2-4,my,5,7,2); ctx.fill(); rr(ctx,cx+w/2-1,my,5,7,2); ctx.fill();
+    // faros / luces traseras
+    const lightY = dir===-1 ? top+3 : top+h-8;
+    ctx.fillStyle= isPlayer? '#fff6c9' : '#ffe9a8';
+    rr(ctx,cx-w/2+7,lightY,10,5,2); ctx.fill(); rr(ctx,cx+w/2-17,lightY,10,5,2); ctx.fill();
+    const tailY = dir===-1 ? top+h-8 : top+3;
+    ctx.fillStyle='#ff3b3b'; rr(ctx,cx-w/2+7,tailY,10,5,2); ctx.fill(); rr(ctx,cx+w/2-17,tailY,10,5,2); ctx.fill();
+    // franja central del jugador
+    if(isPlayer){ ctx.fillStyle='rgba(255,255,255,.55)'; rr(ctx,cx-3,top+6,6,14,2); ctx.fill(); rr(ctx,cx-3,top+h-20,6,14,2); ctx.fill(); }
   }
   function draw(){
     ctx.fillStyle='#191026'; ctx.fillRect(0,0,W,H);
@@ -672,6 +697,8 @@ function Basquet(el){
 /* ============================================================
    NAVE · shooter espacial (tipo Galaga) · 5 niveles
    ============================================================ */
+/* Colores de los extraterrestres por nivel: 1 azul · 2 naranja · 3 rojo · 4 verde · 5 blanco */
+const ALIEN_COLORS=['#3b82f6','#ff8c1a','#ff2e3f','#8cff5a','#ffffff'];
 const NAVE_LEVELS=[
   { meta:8,  espd:1.3, spawn:1150 },
   { meta:12, espd:1.7, spawn:980 },
@@ -722,7 +749,17 @@ function Nave(el){
     ctx.fillStyle='#05030f'; ctx.fillRect(0,0,W,H);
     ctx.fillStyle='rgba(255,255,255,.7)'; stars.forEach(st=>{ st.y+=0.6; if(st.y>H){ st.y=0; st.x=Math.random()*W; } ctx.fillRect(st.x,st.y,st.s,st.s); });
     ctx.fillStyle='#ffe14d'; bullets.forEach(b=>ctx.fillRect(b.x-2,b.y-8,4,10));
-    ctx.font='26px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; enemies.forEach(en=>ctx.fillText('👾', en.x, en.y));
+    const alienCol=ALIEN_COLORS[Math.min(4,level-1)];
+    enemies.forEach(en=>{
+      const x=en.x, y=en.y;
+      ctx.fillStyle=alienCol;
+      ctx.fillRect(x-11,y-7,22,12);                                  // cuerpo
+      ctx.fillRect(x-7,y-12,14,5);                                   // cabeza
+      ctx.fillRect(x-15,y-3,4,7); ctx.fillRect(x+11,y-3,4,7);        // brazos
+      ctx.fillRect(x-9,y+5,5,5);  ctx.fillRect(x+4,y+5,5,5);         // patas
+      ctx.fillStyle='#0a0416';
+      ctx.fillRect(x-6,y-5,4,4);  ctx.fillRect(x+2,y-5,4,4);         // ojos
+    });
     ctx.save(); ctx.translate(shipX,shipY); ctx.rotate(-Math.PI/4); ctx.font='30px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('🚀',0,0); ctx.restore();
   }
   const bind=(id,set)=>{ const b=el.querySelector(id); b.addEventListener('pointerdown',e=>{e.preventDefault(); set(true);}); ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>set(false))); };
@@ -746,11 +783,11 @@ function Nave(el){
    Si falta un archivo, se usa un emoji de reemplazo.
    ============================================================ */
 const BOX_PERSONAJES=[
-  { id:'chavo',       nombre:'El Chavo',       src:'caras/chavo.png',       emoji:'👦', trunk:'#8cff5a' },
-  { id:'chilindrina', nombre:'La Chilindrina', src:'caras/chilindrina.png', emoji:'👧', trunk:'#ff2e9a' },
-  { id:'kiko',        nombre:'Quico',          src:'caras/kiko.png',        emoji:'😗', trunk:'#26e8ff' },
-  { id:'ramon',       nombre:'Don Ramón',      src:'caras/ramon.png',       emoji:'🧔', trunk:'#ffe14d' },
-  { id:'florinda',    nombre:'Doña Florinda',  src:'caras/florinda.png',    emoji:'😠', trunk:'#b14bff' },
+  { id:'chavo',       nombre:'El Chavo',       src:'caras/chavo.jfif',        emoji:'👦', trunk:'#8cff5a' },
+  { id:'chilindrina', nombre:'La Chilindrina', src:'caras/chilindrina.jfif',  emoji:'👧', trunk:'#ff2e9a' },
+  { id:'kiko',        nombre:'Quico',          src:'caras/kiko.jfif',         emoji:'😗', trunk:'#26e8ff' },
+  { id:'ramon',       nombre:'Don Ramón',      src:'caras/donRamon.jfif',     emoji:'🧔', trunk:'#ffe14d' },
+  { id:'florinda',    nombre:'Doña Florinda',  src:'caras/donaFlorinda.jfif', emoji:'😠', trunk:'#b14bff' },
 ];
 const BOX_LEVELS=[
   { hp:55,  dmg:8,  intv:1650, spd:0.8 },
@@ -906,7 +943,7 @@ function Tateti(el){
    TRIVIA
    ============================================================ */
 function Trivia(el){
-  let i=0, score=0, locked=false;
+  let i=0, score=0, locked=false, aciertosNivel=0;
   const TOTAL=PREGUNTAS.length, PORNIVEL=2;               // 10 preguntas = 5 niveles
   el.innerHTML=`<h2>❓ Trivia de León</h2>
     <div class="hud"><span class="lv" id="qLv">Nivel 1/5</span><span>Pregunta <span class="stat" id="qNum">1</span>/${TOTAL}</span><span>✔ <span class="stat" id="qScore">0</span></span></div>
@@ -925,20 +962,32 @@ function Trivia(el){
     if(locked)return; locked=true;
     const nodes=qOpts.querySelectorAll('.tri-opt');
     nodes[ok].classList.add('ok');
-    if(idx===ok){ score++; el.querySelector('#qScore').textContent=score; } else btn.classList.add('no');
+    const acerto=(idx===ok);
+    if(acerto){ score++; aciertosNivel++; el.querySelector('#qScore').textContent=score; }
+    else btn.classList.add('no');
     const eraFinDeNivel=((i+1)%PORNIVEL===0);
     setTimeout(()=>{
-      if(eraFinDeNivel){                                   // completó un nivel de 2 preguntas
+      if(eraFinDeNivel){
         const nivel=nivelDe(i);
-        awardLevel('trivia', nivel); burst();
-        if(score>(Scores.data.triviaBest||0)){ Scores.data.triviaBest=score; Scores.save(); }
-        i++;
-        if(i<TOTAL){
+        if(aciertosNivel===PORNIVEL){          // SOLO sube si acertó las 2
+          awardLevel('trivia', nivel); burst();
+          if(score>(Scores.data.triviaBest||0)){ Scores.data.triviaBest=score; Scores.save(); }
+          i++; aciertosNivel=0;
+          if(i<TOTAL){
+            qText.textContent=''; qOpts.innerHTML='';
+            banner.innerHTML=`¡Nivel ${nivel} superado! ⭐`;
+            const b=document.createElement('button'); b.className='btn mt'; b.textContent='Nivel '+(nivel+1)+' ▶';
+            b.onclick=show; banner.appendChild(document.createElement('br')); banner.appendChild(b);
+          } else end();
+        } else {                                // falló: repite el nivel
+          if(score>(Scores.data.triviaBest||0)){ Scores.data.triviaBest=score; Scores.save(); }
+          const desde=(nivel-1)*PORNIVEL;
           qText.textContent=''; qOpts.innerHTML='';
-          banner.innerHTML=`¡Nivel ${nivel} superado! ⭐`;
-          const b=document.createElement('button'); b.className='btn mt'; b.textContent='Nivel '+(nivel+1)+' ▶';
-          b.onclick=show; banner.appendChild(document.createElement('br')); banner.appendChild(b);
-        } else end();
+          banner.innerHTML=`<span style="color:var(--magenta)">Te faltó alguna... ¡probá de nuevo!</span>`;
+          const b=document.createElement('button'); b.className='btn alt mt'; b.textContent='Repetir nivel '+nivel;
+          b.onclick=()=>{ i=desde; aciertosNivel=0; score-=0; show(); };
+          banner.appendChild(document.createElement('br')); banner.appendChild(b);
+        }
       } else { i++; show(); }
     },900);
   }
