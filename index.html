@@ -46,6 +46,7 @@ body{
     var(--bg);
   color:var(--text); font-family:"Baloo 2",system-ui,sans-serif; min-height:100vh;
   overflow-x:hidden; -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
 }
 body::before{ content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
   background-image:radial-gradient(rgba(255,255,255,.06) 1.4px, transparent 1.6px); background-size:16px 16px; mix-blend-mode:screen; }
@@ -125,7 +126,8 @@ body::before{ content:""; position:fixed; inset:0; z-index:0; pointer-events:non
 .hud .lv{ background:var(--violet); color:#fff; border:2px solid var(--ink); border-radius:999px; padding:3px 12px; font-size:13px }
 .banner{ text-align:center; font-family:"Bangers",cursive; font-size:26px; color:var(--lime); min-height:30px; margin:8px 0; text-shadow:0 0 12px rgba(140,255,90,.5) }
 
-.btn{ font-family:"Baloo 2"; font-weight:800; cursor:pointer; background:var(--violet); color:#fff; border:3px solid var(--ink); padding:10px 18px; border-radius:14px; font-size:16px; box-shadow:3px 3px 0 var(--ink); }
+.btn{ font-family:"Baloo 2"; font-weight:800; cursor:pointer; background:var(--violet); color:#fff; border:3px solid var(--ink); padding:10px 18px; border-radius:14px; font-size:16px; box-shadow:3px 3px 0 var(--ink);
+  -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; touch-action:manipulation; }
 .btn:active{ transform:translate(1px,1px); box-shadow:2px 2px 0 var(--ink) } .btn.alt{ background:var(--cyan); color:var(--ink) } .btn.danger{ background:var(--magenta); color:#fff }
 .stat{ font-weight:800; color:var(--yellow) }
 
@@ -200,8 +202,8 @@ body::before{ content:""; position:fixed; inset:0; z-index:0; pointer-events:non
         <div class="fallback" style="display:none"><div class="emoji">🦁</div><small>Poné una foto llamada <b>foto.jpg</b> al lado de este archivo</small></div>
       </div>
       <!-- FRASE_PORTADA -->
-      <p class="phrase">Diez años de aventuras, risas y partidas juntos. <span class="heart">♥</span><br>Sos lo mejor que nos pasó, campeón. ¡Jugá, sumá estrellas y desbloqueá tus premios!</p>
-      <div class="sign">— con todo el amor, la familia 🦁</div>
+      <p class="phrase">Diez años de aventuras, amor y risas juntos. <span class="heart">♥</span><br>¡Sos lo mejor que nos pasó, hijo!<br>Te amamos siempre y cada día más.<br><br>¡Jugá, sumá estrellas y desbloqueá tus premios!</p>
+      <div class="sign">— con todo el amor, Mamá, Susy y Papá 🦁</div>
     </header>
   </section>
 
@@ -762,7 +764,7 @@ function Nave(el){
     });
     ctx.save(); ctx.translate(shipX,shipY); ctx.rotate(-Math.PI/4); ctx.font='30px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('🚀',0,0); ctx.restore();
   }
-  const bind=(id,set)=>{ const b=el.querySelector(id); b.addEventListener('pointerdown',e=>{e.preventDefault(); set(true);}); ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>set(false))); };
+  const bind=(id,set)=>{ const b=el.querySelector(id); b.addEventListener('contextmenu',e=>e.preventDefault()); b.addEventListener('pointerdown',e=>{e.preventDefault(); set(true);}); ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>set(false))); };
   bind('#nL',v=>moveL=v); bind('#nR',v=>moveR=v); bind('#nFire',v=>firing=v);
   function kd(e){ if(e.key==='ArrowLeft'||e.key==='a'){moveL=true;} if(e.key==='ArrowRight'||e.key==='d'){moveR=true;} if(e.key===' '){e.preventDefault();firing=true;} }
   function ku(e){ if(e.key==='ArrowLeft'||e.key==='a'){moveL=false;} if(e.key==='ArrowRight'||e.key==='d'){moveR=false;} if(e.key===' '){firing=false;} }
@@ -967,7 +969,7 @@ function Boxeo(el){
         ctx.fillText(pow.txt,pow.x,pow.y); }
     }
 
-    const bind=(id,set)=>{ const b=el.querySelector(id); b.addEventListener('pointerdown',e=>{e.preventDefault();set(true);}); ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>set(false))); };
+    const bind=(id,set)=>{ const b=el.querySelector(id); b.addEventListener('contextmenu',e=>e.preventDefault()); b.addEventListener('pointerdown',e=>{e.preventDefault();set(true);}); ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>set(false))); };
     bind('#bxL',v=>moveL=v); bind('#bxR',v=>moveR=v); bind('#bxU',v=>moveU=v); bind('#bxD',v=>moveD=v); bind('#bxB',v=>blocking=v);
     el.querySelector('#bxP').addEventListener('pointerdown',e=>{e.preventDefault();punch();});
     function kd(e){ if(e.key==='ArrowLeft'||e.key==='a')moveL=true; if(e.key==='ArrowRight'||e.key==='d')moveR=true;
