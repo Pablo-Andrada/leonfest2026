@@ -17,7 +17,7 @@
    3) FOTOS: carpeta  fotos/  (1.jpg 2.jpg ...) + arreglo  FOTOS.
    4) TRIVIA: edita  const PREGUNTAS  ("ok" = indice correcto).
    5) PREMIOS: edita  const PREMIOS  (que gana en cada escalon).
-      El ultimo es la BICI.
+      El ultimo es el GRAN PREMIO SORPRESA FINAL.
    6) TITULOS: const TITULOS  son rangos abiertos por estrellas;
       podes colgarles premios nuevos mas adelante.
 
@@ -98,8 +98,9 @@ body::before{ content:""; position:fixed; inset:0; z-index:0; pointer-events:non
 .roadmap{ display:grid; gap:10px; margin-top:16px }
 .premio-row{ display:flex; align-items:center; gap:14px; border:3px solid var(--ink); border-radius:16px; padding:12px 14px; background:linear-gradient(150deg,var(--panel),var(--panel2)); box-shadow:4px 4px 0 rgba(10,4,22,.5) }
 .premio-row.bici{ border-color:var(--yellow); box-shadow:4px 4px 0 var(--magenta), 0 0 22px rgba(255,225,77,.35) }
-.premio-row .pem{ font-size:34px; flex:0 0 auto; filter:grayscale(1) opacity(.55) } .premio-row.open .pem{ filter:none }
-.premio-row .pbody{ flex:1 } .premio-row .pname{ font-weight:800; font-size:16px } .premio-row .pdesc{ color:var(--muted); font-size:13px; margin-top:1px }
+.premio-row .pem{ font-size:34px; flex:0 0 auto; width:56px; text-align:center }
+.premio-row .pbody{ flex:1 } .premio-row .pname{ font-weight:800; font-size:16px; line-height:1.2; overflow-wrap:anywhere }
+.premio-row.bici .pname{ color:#ffc400; font-size:15px } .premio-row .pdesc{ color:var(--muted); font-size:13px; margin-top:1px }
 .premio-row .ptag{ font-weight:800; font-size:12px; padding:4px 10px; border-radius:999px; border:2px solid var(--ink) }
 .ptag.win{ background:var(--lime); color:var(--ink) } .ptag.lock{ background:var(--panel2); color:var(--muted) }
 
@@ -182,6 +183,15 @@ body::before{ content:""; position:fixed; inset:0; z-index:0; pointer-events:non
   display:flex; align-items:center; justify-content:center; font-size:18px }
 .thumbs .th.on{ opacity:1; border-color:var(--yellow) }
 .thumbs .th img{ width:100%; height:100%; object-fit:cover; display:block }
+
+/* Signos de pregunta de los premios (todo es sorpresa) */
+.qmark{ font-family:"Bangers",cursive; font-size:38px; line-height:1; display:block; color:#fff }
+.qmark.off{ color:#4a3a6b; text-shadow:none }
+.qmark.gold{ font-size:52px; font-weight:900; color:#ffc400;
+  text-shadow:0 0 6px #fff3, 0 0 16px #ffc40099, 0 0 30px #ff9d0066, 2px 2px 0 #7a4a00;
+  -webkit-text-stroke:2px #7a4a00; animation:goldPulse 1.6s ease-in-out infinite }
+.qmark.gold.off{ color:#5a4a2b; -webkit-text-stroke:2px #2e2415; text-shadow:none; animation:none }
+@keyframes goldPulse{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.12) } }
 
 #confetti{ position:fixed; inset:0; pointer-events:none; z-index:90 }
 @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important } }
@@ -290,18 +300,22 @@ const PREGUNTAS=[
   { q:'¿Pensás que tuviste lindos cumpleaños? ¿Cuál te gustó más?', o:['Ninguno','Los anteriores (decí cuál)','Este LEON FEST 2026'], ok:2 },
 ];
 
-/* ===== PREMIOS (editá qué gana · el último es la BICI) =====
-   Bajos a propósito: se llega a la bici en ~15 min de juego. */
+/* ===== PREMIOS =====
+   TODOS son sorpresa: en pantalla nunca se dice qué se gana,
+   solo aparece un signo de pregunta de color.
+     estrellas -> cuántas ⭐ hacen falta para desbloquearlo
+     color     -> color del signo de pregunta
+     bici:true -> marca el premio final (dorado, más grande) */
 const PREMIOS=[
-  { estrellas:2,  emoji:'🎁', nombre:'¡GANASTE!', desc:'Premio sorpresa 1' },
-  { estrellas:5,  emoji:'⚽', nombre:'¡GANASTE!', desc:'5 paquetes de figuritas Copa Mundial de Fútbol de 2026 PANINI' },
-  { estrellas:8,  emoji:'🏅', nombre:'¡GANASTE!', desc:'7 paquetes de figuritas Copa Mundial de Fútbol de 2026 PANINI' },
-  { estrellas:11, emoji:'🎖️', nombre:'¡GANASTE!', desc:'13 paquetes de figuritas Copa Mundial de Fútbol de 2026 PANINI' },
-  { estrellas:15, emoji:'❓', nombre:'¡GANASTE!', desc:'Premio Principal: ULTRA SORPRESA... baja las escaleras y disfruta tu sorpresa...', bici:true },
+  { estrellas:2,  color:'#26e8ff', nombre:'Premio Regalo Sorpresa 1', desc:'¡Sorpresa desbloqueada!' },
+  { estrellas:5,  color:'#8cff5a', nombre:'Premio Regalo Sorpresa 2', desc:'¡Sorpresa desbloqueada!' },
+  { estrellas:8,  color:'#ff2e9a', nombre:'Premio Regalo Sorpresa 3', desc:'¡Sorpresa desbloqueada!' },
+  { estrellas:11, color:'#b14bff', nombre:'Premio Regalo Sorpresa 4', desc:'¡Sorpresa desbloqueada!' },
+  { estrellas:15, color:'#ffc400', nombre:'GRAN PREMIO SORPRESA FINAL "LEON FEST 2026"', desc:'¡La sorpresa más grande de todas!', bici:true },
 ];
 
 /* ===== TÍTULOS / RANGOS (abiertos) =====
-   Suben con las estrellas y siguen MÁS ALLÁ de la bici.
+   Suben con las estrellas y siguen MÁS ALLÁ del premio final.
    A futuro podés colgarle un premio nuevo a cualquiera. */
 const TITULOS=[
   { estrellas:0,  emoji:'🐣', nombre:'Novato' },
@@ -344,7 +358,10 @@ function checkPremios(){
   if(document.getElementById('tab-premios').classList.contains('active')){ renderPremios(); renderScores(); }
 }
 function celebrarPremio(p){
-  document.getElementById('celEmoji').textContent=p.emoji;
+  const cel=document.getElementById('celEmoji');
+  cel.innerHTML = p.bici
+    ? `<span class="qmark gold" style="font-size:86px">?</span>`
+    : `<span class="qmark" style="font-size:76px;color:${p.color};text-shadow:0 0 20px ${p.color}aa">?</span>`;
   document.getElementById('celTitle').textContent=p.nombre||'¡GANASTE!';
   document.getElementById('celDesc').innerHTML=`${p.desc}`;
   document.getElementById('celebra').classList.add('open'); burst(p.bici?260:160);
@@ -357,9 +374,14 @@ function renderPremios(){
   const pct=Math.min(100, Math.round(est/goal*100));
   const rows=PREMIOS.map(p=>{
     const open=est>=p.estrellas; const falta=p.estrellas-est;
+    // Signo de pregunta del color del premio. El final (bici:true) va
+    // dorado, más grande y con brillo. Bloqueado = gris apagado.
+    const inter = p.bici
+      ? `<span class="qmark gold ${open?'':'off'}">?</span>`
+      : `<span class="qmark ${open?'':'off'}" style="${open?'color:'+p.color+';text-shadow:0 0 12px '+p.color+'88':''}">?</span>`;
     return `<div class="premio-row ${open?'open':''} ${p.bici?'bici':''}">
-      <div class="pem">${open?p.emoji:'🔒'}</div>
-      <div class="pbody"><div class="pname">${open?p.nombre:'Premio misterioso'}</div>
+      <div class="pem">${inter}</div>
+      <div class="pbody"><div class="pname">${p.nombre}</div>
         <div class="pdesc">${open?p.desc:('Necesitás '+p.estrellas+' ⭐')}</div></div>
       <div class="ptag ${open?'win':'lock'}">${open?'¡Ganado!':('Faltan '+falta+' ⭐')}</div></div>`;
   }).join('');
